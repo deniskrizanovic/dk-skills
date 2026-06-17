@@ -2,26 +2,20 @@
 
 Drop official COSMIC PDFs into this folder, then run the indexer.
 
-**From the skill folder** (`.cursor/skills/cosmic-measurer/cosmic-rule-coach`):
+**From any directory using the SKILL_DIR pattern:**
 
 ```bash
-python3 -m scripts.index_manuals manuals manuals-indexed
-```
-
-**From the repo root:**
-
-```bash
-PYTHONPATH=.cursor/skills/cosmic-measurer/cosmic-rule-coach \
-  python3 -m scripts.index_manuals \
-    .cursor/skills/cosmic-measurer/cosmic-rule-coach/manuals \
-    .cursor/skills/cosmic-measurer/cosmic-rule-coach/manuals-indexed
+SKILL_DIR=$(realpath ~/.claude/skills/dk-cosmic-counting-coach)
+PYTHONPATH=$SKILL_DIR python3 -m scripts.index_manuals \
+  $SKILL_DIR/manuals \
+  $SKILL_DIR/manuals-indexed
 ```
 
 The skill is non-functional until at least one PDF here has been indexed.
 
 ## Recommended manuals
 
-You need to be in the cosmic-rule-coach directory to make it happen
+Use the bootstrap command above to index PDFs in this directory
 
 | Filename (any name works) | Source |
 |---|---|
