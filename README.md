@@ -45,6 +45,46 @@ The indexer is idempotent — re-running skips PDFs whose mtime predates their e
 - `index_manuals.py` — indexes PDFs into heading-chunked markdown
 - `chunk_by_section.py` — heading-aware PDF chunker
 
+---
+
+### `tokencost-setup`
+
+Installs per-session Claude Code token cost tracking into any project. Records token usage and USD cost to `tokencost/cost.csv` via SessionEnd/SessionStart hooks. Generates a Markdown cost report grouped by branch.
+
+**Usage:**
+
+```bash
+# From the root of the target project:
+bash /path/to/dk-skills/tokencost-setup/install.sh
+```
+
+The script is idempotent — safe to run multiple times.
+
+**What it does:**
+1. Copies `cost-tracker.py`, `generate_token_tracker.py`, `sum-cost.py` to `~/.claude/hooks/` (once, shared across all projects)
+2. Creates `tokencost/cost.csv` with correct headers in the target project
+3. Prompts for `branch_pattern`, `output_path`, `repo_url` and writes `tokencost/config.json`
+4. Wires `SessionEnd` and `SessionStart` hooks in `.claude/settings.json`
+
+**After install:**
+
+```bash
+# Generate the cost report
+python3 ~/.claude/hooks/generate_token_tracker.py
+
+# Quick per-branch cost summary
+python3 ~/.claude/hooks/sum-cost.py
+```
+
+**Scripts:** `tokencost-setup/scripts/`
+- `cost-tracker.py` — hook handler (finalize / backfill modes)
+- `generate_token_tracker.py` — Markdown report generator; reads config from `tokencost/config.json`
+- `sum-cost.py` — CLI aggregator; prints cost table by branch
+
+**Note:** Add `tokencost/cost.csv` to `.gitignore` if you don't want to commit session data.
+
+---
+
 ## Requirements
 
 - Python 3.13+
@@ -58,12 +98,18 @@ dk-skills/
 │   ├── SKILL.md
 │   └── scripts/
 │       └── diff_org_changes.py
-└── dk-cosmic-counting-coach/
-    ├── SKILL.md
-    ├── manuals/          # drop COSMIC PDFs here
-    ├── manuals-indexed/  # generated index (git-ignored per PDF size)
-    ├── scripts/
-    │   ├── index_manuals.py
-    │   └── chunk_by_section.py
-    └── tests/
+├── dk-cosmic-counting-coach/
+│   ├── SKILL.md
+│   ├── manuals/          # drop COSMIC PDFs here
+│   ├── manuals-indexed/  # generated index (git-ignored per PDF size)
+│   ├── scripts/
+│   │   ├── index_manuals.py
+│   │   └── chunk_by_section.py
+│   └── tests/
+└── tokencost-setup/
+    ├── install.sh
+    └── scripts/
+        ├── cost-tracker.py
+        ├── generate_token_tracker.py
+        └── sum-cost.py
 ```
