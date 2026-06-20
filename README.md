@@ -47,6 +47,23 @@ The indexer is idempotent — re-running skips PDFs whose mtime predates their e
 
 ---
 
+### `check-traceability`
+
+Checks bi-directional traceability between spec files and test code for all completed implementation steps.
+
+**What it checks:**
+| Check | Direction | Description |
+|---|---|---|
+| All covered | Forward | Every spec scenario has `> Tested by:` or `> Deferred:` — no bare scenarios |
+| Apex refs valid | Forward | Every `Tested by:` Apex reference resolves to a real method in the `.cls` file |
+| e2e refs valid | Forward | Every `Tested by:` e2e reference resolves to an exact test description in the spec file |
+| @spec back-refs | Reverse | Every `// @spec` comment in Apex resolves to a real feature + scenario in the named spec |
+| No banned markers | Format | Flags `not yet covered` and `UI only` markers |
+
+**No scripts** — pure Claude reasoning over spec and test files.
+
+---
+
 ### `check-doc-consistency`
 
 Verifies documentation layers stay in sync after a plan, design doc, or spec changes.
@@ -114,6 +131,8 @@ python3 ~/.claude/hooks/sum-cost.py
 ```
 dk-skills/
 ├── check-doc-consistency/
+│   └── SKILL.md
+├── check-traceability/
 │   └── SKILL.md
 ├── diff-org-changes/
 │   ├── SKILL.md
