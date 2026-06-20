@@ -47,6 +47,25 @@ The indexer is idempotent — re-running skips PDFs whose mtime predates their e
 
 ---
 
+### `check-doc-consistency`
+
+Verifies documentation layers stay in sync after a plan, design doc, or spec changes.
+
+**What it checks:**
+| Layer | Check |
+|---|---|
+| COSMIC arithmetic | Row sums match grand total; each FP row E+X+R+W = CFP |
+| Plan FP table | Every FP in the plan exists in the COSMIC doc with matching CFP |
+| LWC architecture — components | All `lwc/` dirs have a row in the architecture table |
+| LWC architecture — Apex | All `@AuraEnabled` methods documented |
+| Spec coverage markers | No bare/banned scenarios (`not yet covered`, `UI only`) |
+| New FP coverage | Every new `@AuraEnabled` method has a corresponding FP |
+| CONTEXT.md glossary | New terms from plans/specs have glossary entries |
+
+**No scripts** — pure Claude reasoning over the project files.
+
+---
+
 ### `tokencost-setup`
 
 Installs per-session Claude Code token cost tracking into any project. Records token usage and USD cost to `tokencost/cost.csv` via SessionEnd/SessionStart hooks. Generates a Markdown cost report grouped by branch.
@@ -94,6 +113,8 @@ python3 ~/.claude/hooks/sum-cost.py
 
 ```
 dk-skills/
+├── check-doc-consistency/
+│   └── SKILL.md
 ├── diff-org-changes/
 │   ├── SKILL.md
 │   └── scripts/
