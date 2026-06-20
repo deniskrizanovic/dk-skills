@@ -47,6 +47,29 @@ The indexer is idempotent — re-running skips PDFs whose mtime predates their e
 
 ---
 
+### `dod`
+
+Full Definition of Done check for a completed implementation step. Runs traceability, Apex tests with coverage, Playwright e2e suite, and static analysis.
+
+**Usage:** `dod step 4` or `dod capability-tag-object.md`
+
+**What it runs:**
+| Step | What |
+|---|---|
+| 1 | Traceability check (via `check-traceability` logic) |
+| 1.5 | Playwright verification preview (`parse_playwright_assertions.py`) |
+| 2 | Apex tests + coverage (`sf apex run test … \| parse_apex_results.py`) |
+| 3 | Full Playwright e2e suite (`npx playwright test tests/e2e/`) |
+| 4 | Static analysis (`sf code-analyzer run -s 2`) |
+| 5 | FP count prompt if step unlocks new functional processes |
+
+**Scripts:**
+- `dod/parse_apex_results.py` — parses `sf apex run test --result-format json` output into Tests/Coverage/Failures tables
+- `dod/parse_playwright_assertions.py` — extracts assertions from a Playwright spec file for a pre-run preview
+- `dod/OUTPUT_FORMAT.md` — canonical output format reference
+
+---
+
 ### `check-traceability`
 
 Checks bi-directional traceability between spec files and test code for all completed implementation steps.
@@ -134,6 +157,11 @@ dk-skills/
 │   └── SKILL.md
 ├── check-traceability/
 │   └── SKILL.md
+├── dod/
+│   ├── SKILL.md
+│   ├── OUTPUT_FORMAT.md
+│   ├── parse_apex_results.py
+│   └── parse_playwright_assertions.py
 ├── diff-org-changes/
 │   ├── SKILL.md
 │   └── scripts/
