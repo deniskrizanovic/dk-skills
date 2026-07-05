@@ -144,6 +144,23 @@ python3 ~/.claude/hooks/sum-cost.py
 
 ---
 
+### `wine-tasting-coach`
+
+Interactive, bottle-aware wine tasting coach. The user names a wine + vintage; the coach fetches a grounded, cited expectation profile from the web, walks the embedded tasting grid section by section with "prime the category, you confirm" questions, captures the taster's notes, gives calibration feedback (never a score), and logs the session to a Google Sheet.
+
+**Runtime:** Designed for **Claude on the web**, not the local CLI. Requires web search/browse and the **Google Drive connector**; no local filesystem.
+
+**What it does:**
+- Requires wine name + vintage up front (study mode — not blind tasting)
+- Builds an expectation sheet over a trust gradient: winery tech sheet > grape/region/vintage archetype > (avoid) crowd notes, always cross-checked and cited
+- Adjusts for vintage climate and current bottle age (garnet shift / anthocyanin loss for aged reds; ripeness/alcohol for hot vintages)
+- Walks the embedded grid (Sight → Nose → Palate), priming each category without asserting markers are present
+- Produces a filled grid + calibration feedback, then appends the session as a row to a Google Sheet named exactly "Wine Tasting Log"
+
+**No scripts** — a prompt-and-workflow skill; the tasting grid is embedded in `SKILL.md` (re-sync from `wine-tasting-coach/reference/wine-tasting-grid.md`, the human-maintained source, when it changes).
+
+---
+
 ## Requirements
 
 - Python 3.13+
@@ -174,10 +191,14 @@ dk-skills/
 │   │   ├── index_manuals.py
 │   │   └── chunk_by_section.py
 │   └── tests/
-└── tokencost-setup/
-    ├── install.sh
-    └── scripts/
-        ├── cost-tracker.py
-        ├── generate_token_tracker.py
-        └── sum-cost.py
+├── tokencost-setup/
+│   ├── install.sh
+│   └── scripts/
+│       ├── cost-tracker.py
+│       ├── generate_token_tracker.py
+│       └── sum-cost.py
+└── wine-tasting-coach/
+    ├── SKILL.md            # grid embedded; runs on Claude web
+    └── reference/
+        └── wine-tasting-grid.md   # human-maintained grid source
 ```
