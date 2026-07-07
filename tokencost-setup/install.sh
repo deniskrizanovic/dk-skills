@@ -12,7 +12,9 @@ SETTINGS_FILE="$PROJECT_DIR/.claude/settings.json"
 
 # ── Step 1: Global install (idempotent) ──────────────────────────────────────
 
-if [ -f "$HOOKS_DIR/cost-tracker.py" ]; then
+if [ -f "$HOOKS_DIR/cost-tracker.py" ] \
+    && [ -f "$HOOKS_DIR/generate_token_tracker.py" ] \
+    && [ -f "$HOOKS_DIR/sum-cost.py" ]; then
     echo "Global scripts already installed at $HOOKS_DIR — skipping."
 else
     echo "Installing global scripts to $HOOKS_DIR ..."
@@ -141,4 +143,3 @@ echo "Next steps:"
 echo "  - Add 'tokencost/cost.csv' to .gitignore if you don't want to commit session data."
 echo "  - Run 'python3 ~/.claude/hooks/generate_token_tracker.py' from this repo to generate the report."
 echo "  - Run 'python3 ~/.claude/hooks/sum-cost.py' for a quick cost summary (reads tokencost/cost.csv from CWD)."
-PYEOF
