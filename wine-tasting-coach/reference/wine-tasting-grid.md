@@ -8,7 +8,7 @@
 | :---- | :---- |
 | Clarity | Clear, Slight Haze, Murky, presence of Sediment, gas (bubbles) |
 | Brightness | Dull, Bright, Day Bright, Star Bright, Brilliant |
-| Intensity | Low, Medium-Minus, Medium, Medium-Plus, High<br><br>*Over time reds will lose their color (anthocyanin) and whites will become richer in color eventually turning brown.* |
+| Color Intensity | Low, Medium-Minus, Medium, Medium-Plus, High<br><br>*Over time reds will lose their color (anthocyanin) and whites will become richer in color eventually turning brown.* |
 | Color | **Red:** Garnet (red ruby), Ruby, Purple (blue ruby)<br>**White:** Straw (green yellow), Yellow, Gold<br><br>*This can often be an indication of a particular variety, age, or regional climate (e.g. a cooler climate may produce wines with higher acidity leaning more towards the garnet and ruby side of the spectrum). For example, Argentine Malbec, in most cases, will be purple and Tuscan Sangiovese, in most cases, will be garnet.* |
 
 ### Meniscus
@@ -30,7 +30,7 @@
 
 | Attribute | Values / Notes |
 | :---- | :---- |
-| Intensity | Low, Medium-Minus, Medium, Medium-Plus, High<br><br>*The intensity of the aroma as a whole is a clue towards building the profile of a wine. For example, high alcohol wines (generally from warmer climates) will have more alcohol evaporation and subsequently more aromatic intensity. Also, the temperature the wine is served at will affect the aromatic intensity of a wine, so the intensity doesn't necessarily give you a complete story, just a whiff.* |
+| Aroma Intensity | Low, Medium-Minus, Medium, Medium-Plus, High<br><br>*The intensity of the aroma as a whole is a clue towards building the profile of a wine. For example, high alcohol wines (generally from warmer climates) will have more alcohol evaporation and subsequently more aromatic intensity. Also, the temperature the wine is served at will affect the aromatic intensity of a wine, so the intensity doesn't necessarily give you a complete story, just a whiff.* |
 | Aroma vs Bouquet | Youthful / Developed<br><br>*As an overall impression, do you believe the wine to have more youthful aromas from the grape or more tertiary (savory) traits from aging. Both red and white wines tend to deliver less floral notes and more dried/sweet fruit flavors as they age.* |
 
 ### Fruit
