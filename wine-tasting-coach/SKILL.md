@@ -43,10 +43,11 @@ coached walkthrough. The coach:
 1. Takes a named wine + vintage (study mode — **not** blind tasting).
 2. Builds a **grounded expectation sheet** from cited web sources.
 3. Adjusts for **vintage climate and bottle age**.
-4. Walks the grid in order, **priming each category without asserting** markers are present.
-5. Captures the taster's own notes into a **filled grid**.
-6. Closes with **calibration feedback** (what matched / missed / focus next — no score).
-7. **Appends the session** as one row to a Google Sheet library.
+4. For **old wines**, asks how long it was **decanted** and gives grounded, retrospective guidance.
+5. Walks the grid in order, **priming each category without asserting** markers are present.
+6. Captures the taster's own notes into a **filled grid**.
+7. Closes with **calibration feedback** (what matched / missed / focus next — no score).
+8. **Appends the session** as one row to a Google Sheet library.
 
 ---
 
@@ -128,7 +129,55 @@ State the adjustments you made so the user understands the reasoning.
 
 ---
 
-## Step 3 — Grid-driven walkthrough
+## Step 3 — Decant check (old wines only)
+
+Decanting is a serving decision that materially changes what the taster is about to
+perceive, and for an **old / mature** wine the right call is non-obvious: mature bottles
+throw sediment that must be separated, and their fragile tertiary aromatics can be blown
+off by too much air. Surface this variable **before** the walkthrough so a faded nose can
+be read as preparation, not a palate miss.
+
+**Trigger — old wines only.** Run this step **only when you assessed the wine as
+old / mature** during the Step 2 bottle-age adjustment. If the wine is **young**, skip
+this step entirely and go straight to the walkthrough. Do **not** introduce a new age
+rule here — reuse the maturity judgement you already made.
+
+### Ask first
+
+Before presenting the first grid section, ask **how long the wine has been decanted for**.
+Accept **"not decanted" / "poured straight from the bottle"** as a valid answer.
+
+### Then give retrospective guidance
+
+Once the user answers, tell them how long you would have recommended decanting a wine of
+this **age and structure**, then **compare** it to what they actually did and explain the
+**likely sensory effect** of the difference:
+
+- **Fragile older wines:** typically decant **gently off the sediment** with **short or
+  minimal aeration** to preserve delicate tertiary aromatics — over-aeration can hollow
+  out an old wine.
+- **Sturdier mature wines** (still structured / tannic): tolerate **more air**; a longer
+  decant can open them up.
+
+Reason from the specific bottle — this is **per-bottle judgement, not a universal minute
+count**. Frame it as **learning feedback, not a grade** or quality verdict, consistent
+with the rest of the skill.
+
+**Effect on calibration and the metric.** The decant context **MAY** inform how you
+interpret divergence later (e.g. "the nose reads faded here, which fits over-decanting
+rather than a missed marker"), but it **MUST NOT** change the **Perception Alignment**
+metric — a preparation artifact is explanatory context, recorded qualitatively, never a
+scored miss.
+
+### Age unknown / ungrounded
+
+If the wine is **ungrounded** or you **cannot confidently judge** whether it is
+old / mature, **ask the user** or **note that you cannot advise on decanting** rather than
+guessing. Do not force the check.
+
+---
+
+## Step 4 — Grid-driven walkthrough
 
 Walk the user through the **embedded grid below** in its **published order**
 (Sight → Nose → Palate), **one section at a time**. Do not skip ahead to a later
@@ -167,7 +216,7 @@ Worked examples, one per grid area:
 
 ---
 
-## Step 4 — Capture and calibration
+## Step 5 — Capture and calibration
 
 ### Filled grid (in-conversation)
 
@@ -224,7 +273,7 @@ strongly enough to calibrate against). Do **not** emit a misleading `0`.
 feedback — never as a replacement for it — and **paired with its trend across recent
 sessions**, so the number reads as a mirror, not a headline verdict. Compute the trend
 from the Perception Alignment values in **prior** rows of the `Wine Tasting Log` sheet,
-**read via the connector** (see Step 5), e.g. *"6/8 high-confidence markers — up from
+**read via the connector** (see Step 6), e.g. *"6/8 high-confidence markers — up from
 your last three sessions."* The current session's row is **not** in the sheet yet (the
 user pastes it after the session), so the trend reflects prior sessions and this session
 is the new data point being added. Early on there is no trend yet; show the raw count and
@@ -232,7 +281,7 @@ note that the trend accrues as more sessions are logged.
 
 ---
 
-## Step 5 — Persist to the Google Sheet library
+## Step 6 — Persist to the Google Sheet library
 
 Persist each completed session as a **single row** in a Google Sheet named **exactly**
 `Wine Tasting Log` in the user's Google Drive, so tastings accumulate into a filterable,
@@ -248,7 +297,7 @@ sheet but **cannot append** to one. So:
   (see "Tab-delimited copyable row" below). This is the normal path today, not a rare
   degraded mode.
 - **The connector's working job today is *reading*** prior rows — that is how the
-  **Perception Alignment trend** in Step 4 is computed. Keep reading (for the trend) and
+  **Perception Alignment trend** in Step 5 is computed. Keep reading (for the trend) and
   writing (the pasted row) clearly separate: reads work now; writes are manual paste.
 
 ### Column schema (stable across sessions)
@@ -272,7 +321,7 @@ In order, left to right:
 5. **Calibration summary column:** `Calibration Summary` — the human-readable
    matched/missed/focus-next text.
 6. **Perception Alignment column:** `Perception Alignment` — the session's metric (see
-   Step 4), so the trend can be computed from history. Record it as the count over the
+   Step 5), so the trend can be computed from history. Record it as the count over the
    high-confidence denominator (e.g. `6/8`). Leave the cell **blank** when the session had
    an empty denominator (no high-confidence markers) — a blank is not a zero.
 
