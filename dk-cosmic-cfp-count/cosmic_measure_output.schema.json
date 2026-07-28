@@ -1,0 +1,82 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://sf-cosmic-measurer/schemas/cosmic-measure-output.json",
+  "title": "CosmicMeasureOutput",
+  "description": "Deterministic JSON output produced by COSMIC measurer skills. Derived from shared/output.py (CosmicMeasureOutput). Schema v3 additive: optional per-process `cfp`; `implementationType`/`isApiCall` relaxed to optional so proposal-grain measurements (no source code) can omit them.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["functionalProcessId", "artifact", "dataMovements"],
+  "properties": {
+    "functionalProcessId": {
+      "type": "string",
+      "description": "Functional process identifier; defaults to \"<Id>\" placeholder when unset."
+    },
+    "cfp": {
+      "type": "integer",
+      "description": "Schema v3 additive: functional-process COSMIC size (CFP). Optional; when absent equals the count of dataMovements (1 movement = 1 CFP)."
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "name"],
+      "properties": {
+        "type": { "type": "string" },
+        "name": { "type": "string" }
+      }
+    },
+    "dataMovements": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/dataMovement" }
+    },
+    "traversalWarnings": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "definitions": {
+    "movementType": {
+      "type": "string",
+      "enum": ["E", "R", "W", "X"]
+    },
+    "mergedFromItem": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string" },
+        "sourceLine": { "type": "integer" }
+      }
+    },
+    "dataMovement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "order", "movementType", "dataGroupRef"],
+      "properties": {
+        "name": { "type": "string" },
+        "order": { "type": "integer" },
+        "movementType": { "$ref": "#/definitions/movementType" },
+        "dataGroupRef": { "type": "string" },
+        "implementationType": { "type": "string" },
+        "isApiCall": { "type": "boolean" },
+        "sourceLine": { "type": "integer" },
+        "mergedFrom": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/mergedFromItem" }
+        },
+        "viaArtifact": { "type": "string" },
+        "artifactName": { "type": "string" },
+        "isAsync": { "type": "boolean" },
+        "tier": { "type": "integer" },
+        "tierLabel": { "type": "string" },
+        "triggeringBlock": { "type": "string" },
+        "note": {
+          "type": "string",
+          "description": "Schema v2 additive: rule justification from Markdown count Note column."
+        },
+        "citation": {
+          "type": "string",
+          "description": "Schema v2 additive: rule justification from Markdown count Citation column."
+        }
+      }
+    }
+  }
+}
