@@ -1,5 +1,5 @@
 export const meta = {
-  name: 'cosmic-cfp-count',
+  name: 'cosmic-csv-to-cfp',
   description: 'Full COSMIC (CFP) measurement of a scope from an epics list: shared rules primer, one agent per epic, coach-grounded, standalone JSON output',
   phases: [
     { title: 'Prime' },      // derive the common COSMIC rules ONCE (token saver)
@@ -204,7 +204,7 @@ if (failedEpics.length) log(`⚠ ${failedEpics.length} epic(s) failed to measure
 
 // The object is fully assembled in JS above — deterministic and JS-computed.
 // It is returned VERBATIM as the workflow result; the caller writes it to
-// data/cosmic-count.json with the Write tool (see SKILL.md Step 2). We do NOT
+// $OUT_DIR/cosmic-count.json with the Write tool (see SKILL.md Step 2). We do NOT
 // spend an agent to re-serialize it: an LLM echoing the whole object back
 // costs the tokens twice and risks silently altering a value the roll-up
 // depends on. The return value is the single source of truth.
@@ -214,5 +214,5 @@ return {
   epicsMeasured: measured.length,
   epicsFailed: failedEpics,
   gaps: allGaps.length,
-  cosmicCount: fileObject,   // write this to data/cosmic-count.json verbatim
+  cosmicCount: fileObject,   // write this to $OUT_DIR/cosmic-count.json verbatim
 }

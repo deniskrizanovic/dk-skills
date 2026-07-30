@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Convert an epics CSV into the JSON `args` the cosmic-cfp-count workflow consumes.
+"""Convert an epics CSV into the JSON `args` the cosmic-csv-to-cfp workflow consumes.
 
 Usage:
     python3 epics_csv_to_args.py <epics.csv>

@@ -1,5 +1,5 @@
 ---
-name: dk-cosmic-cfp-count
+name: dk-cosmic-csv-to-cfp
 description: >
   Measures the COSMIC functional size (CFP) of a delivery scope from a CSV of
   epics. Runs a multi-agent workflow: derives the COSMIC v5.0 rules once, measures
@@ -21,7 +21,7 @@ gaps surfaced instead of guessed.
 
 > **Path resolution.** At session start resolve the skill directory once:
 > ```bash
-> SKILL_DIR=$(realpath ~/.claude/skills/dk-cosmic-cfp-count)
+> SKILL_DIR=$(realpath ~/.claude/skills/dk-cosmic-csv-to-cfp)
 > ```
 > All `scripts/` references below mean `$SKILL_DIR/scripts/`.
 
@@ -48,7 +48,7 @@ Any extra columns pass through as context to the measuring agent.
 
 ## Execution
 
-### Step 1 — CSV → workflow args
+### Step 1 — CSV → workflow args, and resolve the output directory
 
 ```bash
 python3 "$SKILL_DIR/scripts/epics_csv_to_args.py" <path/to/epics.csv> > /tmp/cfp-args.json
@@ -57,13 +57,27 @@ python3 "$SKILL_DIR/scripts/epics_csv_to_args.py" <path/to/epics.csv> > /tmp/cfp
 This emits `{"epics":[...]}`. Read the file and confirm the epic count with the
 user before the (token-heavy) run.
 
+**Resolve `OUT_DIR` — where the outputs go.** Default to the parent directory of
+the input CSV:
+
+```bash
+OUT_DIR=$(dirname "<path/to/epics.csv>")
+```
+
+If the user named an output directory, use that instead (`mkdir -p` it). Both
+artifacts write **directly** into `OUT_DIR` — `cosmic-count.json` and
+`cosmic-count.md`, side by side. **Never** write inside the skill directory
+(`$SKILL_DIR`) and **never** recreate the old `data/` or `outputs/artifacts/`
+subdirectories. If `OUT_DIR` is not writable, surface the error and ask the user
+for an alternate directory.
+
 ### Step 2 — run the measurement workflow
 
 Invoke the Workflow tool with the script and the parsed args:
 
 ```
 Workflow({
-  scriptPath: "<SKILL_DIR>/scripts/cosmic-cfp-count.workflow.js",
+  scriptPath: "<SKILL_DIR>/scripts/cosmic-csv-to-cfp.workflow.js",
   args: <the parsed {epics:[...]} object>
 })
 ```
@@ -86,13 +100,13 @@ Workflow({
    object costs tokens twice and can silently alter a value).
 
 After the workflow returns, write `result.cosmicCount` **verbatim** to
-`data/cosmic-count.json` (pretty-printed, 2-space indent) with the Write tool.
+`$OUT_DIR/cosmic-count.json` (pretty-printed, 2-space indent) with the Write tool.
 If `result.epicsFailed` is non-empty, surface those epic IDs to the user — they
 were excluded from the roll-up and the count is partial.
 
 ### Output format — two schemas (camelCase)
 
-`data/cosmic-count.json` is governed by two JSON Schemas that ship in the skill
+`$OUT_DIR/cosmic-count.json` is governed by two JSON Schemas that ship in the skill
 directory:
 
 - **`cosmic_count_report.schema.json`** (`CosmicCountReport`) — the report
@@ -121,10 +135,11 @@ directory:
 ### Step 3 — render the markdown report
 
 ```bash
-python3 "$SKILL_DIR/scripts/render_markdown.py" data/cosmic-count.json outputs/artifacts/cosmic-count.md
+python3 "$SKILL_DIR/scripts/render_markdown.py" "$OUT_DIR/cosmic-count.json" "$OUT_DIR/cosmic-count.md"
 ```
 
-Surface both output paths to the user as inline-backtick absolute paths.
+Surface both output paths (`$OUT_DIR/cosmic-count.json` and
+`$OUT_DIR/cosmic-count.md`) to the user as inline-backtick absolute paths.
 
 ## Guardrails
 

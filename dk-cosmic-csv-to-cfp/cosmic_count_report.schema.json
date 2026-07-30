@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://sf-cosmic-measurer/schemas/cosmic-count-report.json",
   "title": "CosmicCountReport",
-  "description": "Report envelope for the dk-cosmic-cfp-count skill. Models a whole delivery-scope COSMIC measurement: a roll-up, a shared rules primer, per-epic measurements, and measurement gaps. Each epic's functionalProcesses[] item is a standalone CosmicMeasureOutput (child schema).",
+  "description": "Report envelope for the dk-cosmic-csv-to-cfp skill. Models a whole delivery-scope COSMIC measurement: a roll-up, a shared rules primer, per-epic measurements, and measurement gaps. Each epic's functionalProcesses[] item is a standalone CosmicMeasureOutput (child schema).",
   "type": "object",
   "additionalProperties": false,
   "required": ["disclaimer", "rollUp", "epics", "measurementGaps"],

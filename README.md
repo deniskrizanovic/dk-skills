@@ -18,7 +18,7 @@ Diffs a Salesforce org against local source and presents results as grouped, int
 
 ---
 
-### `dk-cosmic-cfp-count`
+### `dk-cosmic-csv-to-cfp`
 
 Measures the COSMIC functional size (CFP) of a delivery scope from a CSV of epics — a multi-agent workflow that grounds every count in the `dk-cosmic-counting-coach` manuals.
 
@@ -26,11 +26,11 @@ Measures the COSMIC functional size (CFP) of a delivery scope from a CSV of epic
 - Parses an epics CSV (`Epic ID`, `Epic Name`, `Description`, optional `Confidence`/`Depends On`) into workflow args
 - Derives the recurring COSMIC v5.0 rules **once** (primer), then measures each epic in parallel (one agent per epic), decomposing every functional process into E/X/R/W movements with manual citations
 - Surfaces vague requirements as measurement gaps with CFP swings — never invents a number
-- Computes the roll-up in code and writes canonical `data/cosmic-count.json`, then renders a markdown report
+- Computes the roll-up in code and writes canonical `cosmic-count.json` (defaulting next to the input CSV), then renders a markdown report alongside it
 
 **Depends on:** `dk-cosmic-counting-coach` (the rule authority).
 
-**Scripts:** `dk-cosmic-cfp-count/scripts/epics_csv_to_args.py`, `cosmic-cfp-count.workflow.js`, `render_markdown.py`
+**Scripts:** `dk-cosmic-csv-to-cfp/scripts/epics_csv_to_args.py`, `cosmic-csv-to-cfp.workflow.js`, `render_markdown.py`
 
 ---
 
