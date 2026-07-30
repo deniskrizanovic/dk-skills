@@ -11,4 +11,4 @@
 
 - [x] 2.1 Re-read the edited `SKILL.md` to confirm the trigger, the decant question, the retrospective guidance, the not-a-grade framing, and the age-unknown path all match the delta spec scenarios.
 - [x] 2.2 Confirm no Google Sheet column was added and the log schema/column order is unchanged.
-- [ ] 2.3 Validate the change with the OpenSpec tooling once available (`openspec validate add-decant-guidance-old-wine` / `openspec status`).
+- [x] 2.3 Validate the change with the OpenSpec tooling (`openspec validate add-decant-guidance-old-wine` → "is valid"; `openspec status` for overall completion).

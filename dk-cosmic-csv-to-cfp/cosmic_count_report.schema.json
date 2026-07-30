@@ -1,0 +1,109 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://sf-cosmic-measurer/schemas/cosmic-count-report.json",
+  "title": "CosmicCountReport",
+  "description": "Report envelope for the dk-cosmic-csv-to-cfp skill. Models a whole delivery-scope COSMIC measurement: a roll-up, a shared rules primer, per-epic measurements, and measurement gaps. Each epic's functionalProcesses[] item is a standalone CosmicMeasureOutput (child schema).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["disclaimer", "rollUp", "epics", "measurementGaps"],
+  "properties": {
+    "disclaimer": {
+      "type": "string",
+      "description": "Approximate-early-measurement caveat travelling in the output."
+    },
+    "rulesPrimer": {
+      "type": "string",
+      "description": "Compact reusable COSMIC v5.0 rules primer derived once and injected into every measure agent."
+    },
+    "rollUp": { "$ref": "#/definitions/rollUp" },
+    "epics": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/epic" }
+    },
+    "measurementGaps": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/gap" }
+    }
+  },
+  "definitions": {
+    "rollUp": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["projectCfpCountable", "cfpRange", "epicsMeasured", "epicsTotal", "countableEpics", "epicsRestingOnAssumptions"],
+      "properties": {
+        "projectCfpCountable": {
+          "type": "integer",
+          "description": "Sum of every measured epic's epicCfp."
+        },
+        "cfpRange": {
+          "type": "array",
+          "description": "[confirmedFloor, measuredTotal] — low bound is the sum of Confirmed epics only.",
+          "items": { "type": "integer" },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "epicsMeasured": { "type": "integer" },
+        "epicsTotal": { "type": "integer" },
+        "countableEpics": { "type": "integer" },
+        "epicsRestingOnAssumptions": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Epic IDs whose confidence is not Confirmed."
+        },
+        "epicsFailed": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Epic IDs whose measure agent errored; excluded from the roll-up (partial count)."
+        }
+      }
+    },
+    "epic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["epicId", "epicCfp", "confidence", "functionalProcesses", "gaps"],
+      "properties": {
+        "epicId": { "type": "string" },
+        "epicName": { "type": "string" },
+        "functionalUsers": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "confidence": {
+          "type": "string",
+          "enum": ["Confirmed", "Assumed", "Unknown"]
+        },
+        "epicCfp": {
+          "type": "integer",
+          "description": "Sum of the epic's functional-process CFP values."
+        },
+        "caveats": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "functionalProcesses": {
+          "type": "array",
+          "description": "Each item is a standalone CosmicMeasureOutput (child schema).",
+          "items": { "$ref": "https://sf-cosmic-measurer/schemas/cosmic-measure-output.json" }
+        },
+        "gaps": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/gap" }
+        }
+      }
+    },
+    "gap": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["gapId", "category", "gapOrQuestion", "impactOrNotes"],
+      "properties": {
+        "gapId": {
+          "type": "string",
+          "description": "Deterministic identifier, e.g. CG-E01-01."
+        },
+        "category": { "type": "string" },
+        "gapOrQuestion": { "type": "string" },
+        "impactOrNotes": { "type": "string" }
+      }
+    }
+  }
+}
