@@ -1,0 +1,1664 @@
+{
+  "disclaimer": "CFP derived from proposal-grain Functional User Requirements is an approximate early measurement per COSMIC Part 2, not a code-verified count. Epics tagged Assumed/Unknown rest on assumptions and should be re-measured against built artifacts.",
+  "rollUp": {
+    "projectCfpCountable": 75,
+    "cfpRange": [
+      0,
+      75
+    ],
+    "epicsMeasured": 12,
+    "epicsTotal": 12,
+    "countableEpics": 12,
+    "epicsRestingOnAssumptions": [
+      "E01",
+      "E02",
+      "E03",
+      "E04",
+      "E05",
+      "E06",
+      "E07",
+      "E08",
+      "E09",
+      "E10",
+      "E11",
+      "E12"
+    ],
+    "epicsFailed": []
+  },
+  "rulesPrimer": "I have everything needed. Composing the primer.\n\n---\n\n## Answer\n\nCOSMIC v5.0 movement-pattern primer for Salesforce scope. Each rule is one to two sentences with an exact citation.\n\n### 1. External-system round-trip (call another piece of software, receive response)\nThe external system is a functional user; the request out is one **Exit** and the response back in is one **Entry** (2 movements), analyzed as normal Exits/Entries regardless of whether the response signals an error.\n> \"All other data, issued or received by the software being measured, to/from its hardware or software functional users should be analyzed according to the FUR as Exits or Entries respectively, according to the normal COSMIC rules, regardless of whether or not the data values indicate an error condition.\" — [part-2 §3.3.4, GUIDANCE on Rules 16-19] (manuals-indexed/part-2-mm-guidelines-v5-0-sep-2024/03-the-mapping-phase.md#L273-L276)\n\n### 2. CRUD on a persistent object of interest\nReading persistent data = one **Read** per data group; creating or updating persistent data = one **Write**; deleting = a single **Write**. (Entry to receive the request and Exit to return results are counted separately per that FP.)\n> \"A Read shall: a) retrieve a single data group from persistent storage… A Write shall: a) move data attributes from a single data group to persistent storage… RULE 20: Write – Delete. A requirement to delete a data group from persistent storage shall be a single Write data movement.\" — [part-1 §4.5, Rules 18–20] (manuals-indexed/part-1-mm-principles-definitions-rules-v5-0-aug-2021/04-mapping-phase.md#L134-L149)\n\n### 3. Confirmation and error messages back to the user\nAll confirmation/error messages a functional process can issue collapse into **one Exit**; only genuinely additional data in a message counts as a further Exit, and error indications arising from a Read/Write add no movement.\n> \"One Exit is identified to account for all types of error/confirmation messages issued by any one functional process… If a message… provides data in addition to confirming… this additional data is identified as a separate data group moved by an Exit… Reads and Writes are considered to account for any associated reporting of error conditions.\" — [part-2 §3.3.4, GUIDANCE on Rules 16-19] (manuals-indexed/part-2-mm-guidelines-v5-0-sep-2024/03-the-mapping-phase.md#L265-L279)\n\n### 4. What makes two functional processes DISTINCT vs one\nA functional process is defined by its **triggering event** detected by a **functional user**; a different triggering event (which cannot be sub-divided) initiated by a functional user is a different functional process.\n> \"be initiated by an Entry data movement from a functional user informing the functional process that it has detected a triggering event… NOTE 3: In a set of FUR, each event which causes a functional user to trigger a functional process cannot be sub-divided… has either happened or it has not happened.\" — [part-1 §4.2, Rule 10] (manuals-indexed/part-1-mm-principles-definitions-rules-v5-0-aug-2021/04-mapping-phase.md#L17-L37)\n\n### 5. Single triggering Entry; all responses belong to one FP\nExactly one **triggering Entry** starts a functional process, and that process comprises the set of all data movements needed to meet its FUR for every possible response to that Entry.\n> \"RULE 13: Functional Process – Single Entry. For any one functional process, a single Entry data movement shall be identified and counted…\" plus \"'the set of all data movements that is needed to meet its FUR for all the possible responses to its triggering Entry'.\" — [part-1 §4.2/4.4, Rule 10 NOTE 1 & Rule 13] (manuals-indexed/part-1-mm-principles-definitions-rules-v5-0-aug-2021/04-mapping-phase.md#L24-L99)\n\n## Caveats\n- No dedicated worked example for federated SSO/API round-trips exists in the indexed manuals; item 1 is derived from the general functional-user Exit/Entry rule (part-2 §3.3.4 point c), not a Salesforce-specific case.\n- Every movement type occurring multiple times with different values still counts once per type (Rule 15, part-1 #L106-L109).\n- Indexed corpus is Parts 1, 2, and 3c only; domain guidelines (SOA, business apps) are not indexed.",
+  "epics": [
+    {
+      "epicId": "E01",
+      "epicName": "Log a Lost Pet Report",
+      "epicCfp": 8,
+      "confidence": "Assumed",
+      "functionalUsers": [
+        "Contact-centre agent",
+        "SMS gateway"
+      ],
+      "functionalProcesses": [
+        {
+          "functionalProcessId": "FP1-SearchAnimalRegistry",
+          "artifact": {
+            "type": "epic",
+            "name": "Log a Lost Pet Report"
+          },
+          "dataGroups": [
+            {
+              "name": "Pet Search Criteria",
+              "description": "Species/breed/description and/or microchip identifier supplied by the agent to look for existing matches."
+            },
+            {
+              "name": "Registered Animal (Microchip) Record",
+              "description": "Persistent registry record of a microchip-registered animal used to detect a match."
+            },
+            {
+              "name": "Found-Pet Record",
+              "description": "Persistent registry record of a previously reported found pet used to detect a match."
+            },
+            {
+              "name": "Potential Match Result",
+              "description": "Consolidated set of candidate matching animals returned to the agent for review."
+            }
+          ],
+          "dataMovements": [
+            {
+              "name": "Enter pet search criteria",
+              "order": 1,
+              "movementType": "E",
+              "dataGroupRef": "Pet Search Criteria",
+              "note": "Single triggering Entry: functional user (agent) informs the process of the triggering event (a match check is requested). Rule 10/Rule 13.",
+              "citation": "manuals-indexed/part-1-mm-principles-definitions-rules-v5-0-aug-2021/04-mapping-phase.md#L17-L99"
+            },
+            {
+              "name": "Read registered animal (microchip) records",
+              "order": 2,
+              "movementType": "R",
+              "dataGroupRef": "Registered Animal (Microchip) Record",
+              "note": "Retrieve a data group of persistent registry data to find microchip matches. Rule 18 (Read).",
+              "citation": "manuals-indexed/part-1-mm-principles-definitions-rules-v5-0-aug-2021/04-mapping-phase.md#L134-L149"
+            },
+            {
+              "name": "Read found-pet records",
+              "order": 3,
+              "movementType": "R",
+              "dataGroupRef": "Found-Pet Record",
+              "note": "Distinct object of interest from microchip records; a separate Read retrieves found-pet matches. Rule 18 (Read).",
+              "citation": "manuals-indexed/part-1-mm-principles-definitions-rules-v5-0-aug-2021/04-mapping-phase.md#L134-L149"
+            },
+            {
+              "name": "Display potential matches to agent",
+              "order": 4,
+              "movementType": "X",
+              "dataGroupRef": "Potential Match Result",
+              "note": "Data issued to a functional user (agent) is analyzed as a normal Exit; a 'no matches' outcome is covered by the Read and needs no extra movement.",
+              "citation": "manuals-indexed/part-2-mm-guidelines-v5-0-sep-2024/03-the-mapping-phase.md#L273-L276"
+            }
+          ],
+          "cfp": 4
+        },
+        {
+          "functionalProcessId": "FP2-CreateLostPetCase",
+          "artifact": {
+            "type": "epic",
+            "name": "Log a Lost Pet Report"
+          },
+          "dataGroups": [
+            {
+              "name": "Lost Pet Case",
+              "description": "The case record carrying caller details, pet species/breed/description, last-seen location and date, contact number, queue assignment and generated case reference."
+            },
+            {
+              "name": "SMS Confirmation",
+              "description": "Outbound confirmation message carrying the case reference, addressed to the caller via the SMS gateway."
+            },
+            {
+              "name": "Case Confirmation",
+              "description": "Confirmation / case reference returned on-screen to the agent acknowledging successful case creation."
+            }
+          ],
+          "dataMovements": [
+            {
+              "name": "Submit lost-pet report details",
+              "order": 1,
+              "movementType": "E",
+              "dataGroupRef": "Lost Pet Case",
+              "note": "Single triggering Entry from the agent (distinct triggering event: create the case) carrying caller, pet, location, date and contact attributes. Rule 10/Rule 13.",
+              "citation": "manuals-indexed/part-1-mm-principles-definitions-rules-v5-0-aug-2021/04-mapping-phase.md#L17-L99"
+            },
+            {
+              "name": "Create lost-pet case",
+              "order": 2,
+              "movementType": "W",
+              "dataGroupRef": "Lost Pet Case",
+              "note": "Move the case data group to persistent storage. Rule 19 (Write). Queue routing (owner = Animal Management queue) is an attribute of the same case object and is not a separate Write.",
+              "citation": "manuals-indexed/part-1-mm-principles-definitions-rules-v5-0-aug-2021/04-mapping-phase.md#L134-L149"
+            },
+            {
+              "name": "Send SMS confirmation to caller",
+              "order": 3,
+              "movementType": "X",
+              "dataGroupRef": "SMS Confirmation",
+              "note": "Data issued to a software/hardware functional user (SMS gateway) is a normal Exit; no response is described so no Entry round-trip.",
+              "citation": "manuals-indexed/part-2-mm-guidelines-v5-0-sep-2024/03-the-mapping-phase.md#L273-L276"
+            },
+            {
+              "name": "Return case reference confirmation to agent",
+              "order": 4,
+              "movementType": "X",
+              "dataGroupRef": "Case Confirmation",
+              "note": "One Exit accounts for all confirmation messages returned to the triggering functional user (agent) acknowledging case creation.",
+              "citation": "manuals-indexed/part-2-mm-guidelines-v5-0-sep-2024/03-the-mapping-phase.md#L265-L279"
+            }
+          ],
+          "cfp": 4
+        }
+      ],
+      "gaps": [
+        {
+          "gapId": "CG-E01-01",
+          "category": "Measurement Gap",
+          "gapOrQuestion": "Is the animal-registry match check a distinct functional process (agent explicitly requests a search, reviews matches, then creates the case), or is it performed automatically inside the case-creation process with a single triggering event?",
+          "impactOrNotes": "Modeled as two FPs (separate triggering Entries). If it is one combined FP, the second triggering Entry disappears: swing -1 CFP (epic 8 -> 7)."
+        },
+        {
+          "gapId": "CG-E01-02",
+          "category": "Measurement Gap",
+          "gapOrQuestion": "Are microchip/registered-animal records and found-pet records two distinct objects of interest, and are matches returned to the agent as one consolidated data group or two?",
+          "impactOrNotes": "Modeled as 2 Reads + 1 consolidated Exit. If it is a single registry object one Read is lost (-1); if matches are returned as two separate data groups one Exit is added (+1). Swing -1 to +1 CFP on FP1."
+        },
+        {
+          "gapId": "CG-E01-03",
+          "category": "Measurement Gap",
+          "gapOrQuestion": "Is routing to the Animal Management queue an attribute update on the same case record (folded into the case Write) or a data movement to a separate work-management system/object?",
+          "impactOrNotes": "Modeled as part of the case Write (no extra movement). If routing is a separate Write or an Exit to another system, swing +1 CFP on FP2."
+        },
+        {
+          "gapId": "CG-E01-04",
+          "category": "Measurement Gap",
+          "gapOrQuestion": "Does the case-creation process return an on-screen confirmation / case reference to the agent, or is the SMS to the caller the only acknowledgement?",
+          "impactOrNotes": "Included an agent-confirmation Exit as the natural response to the agent's triggering Entry. If no data is returned to the agent, swing -1 CFP on FP2."
+        }
+      ]
+    },
+    {
+      "epicId": "E02",
+      "epicName": "Request Tree Lopping or Removal",
+      "epicCfp": 6,
+      "confidence": "Assumed",
+      "functionalUsers": [
+        "Agent (Contact Centre / Council officer capturing the request)",
+        "Asset/GIS boundary service (external software)",
+        "Parks & Gardens crew",
+        "Resident (acknowledgement recipient)"
+      ],
+      "functionalProcesses": [
+        {
+          "functionalProcessId": "FP1-RegisterTreeWorksRequest",
+          "artifact": {
+            "type": "epic",
+            "name": "E02 Request Tree Lopping or Removal"
+          },
+          "dataGroups": [
+            {
+              "name": "Tree Works Request",
+              "description": "The lopping/removal request describing the tree of interest: location (address or map pin), reported reason/hazard, and the priority derived from the reported hazard; entered by the agent and persisted as a works request."
+            },
+            {
+              "name": "Tree Location Query",
+              "description": "Location/parcel coordinates sent to the asset/GIS boundary service to test whether the tree sits on council land."
+            },
+            {
+              "name": "Council Land Determination",
+              "description": "Ownership/boundary result returned by the GIS service indicating whether the tree location falls on council-owned land."
+            },
+            {
+              "name": "Crew Notification",
+              "description": "Work-assignment alert dispatched to the Parks & Gardens crew for the created works request."
+            },
+            {
+              "name": "Resident Acknowledgement",
+              "description": "Confirmation email to the resident including the expected response time for the request."
+            }
+          ],
+          "dataMovements": [
+            {
+              "name": "Agent submits tree request",
+              "order": 1,
+              "movementType": "E",
+              "dataGroupRef": "Tree Works Request",
+              "note": "Single triggering Entry that starts the functional process, carrying the tree location and reason describing the works-request object of interest (Rule 13 single Entry; associated validations/formatting absorbed by the Entry).",
+              "citation": "manuals-indexed/part-1-mm-principles-definitions-rules-v5-0-aug-2021/04-mapping-phase.md#L95-L99"
+            },
+            {
+              "name": "Query GIS boundary service for council-land check",
+              "order": 2,
+              "movementType": "X",
+              "dataGroupRef": "Tree Location Query",
+              "note": "External-system round-trip: request out to the asset/GIS boundary service (a software functional user) is one Exit.",
+              "citation": "manuals-indexed/part-2-mm-guidelines-v5-0-sep-2024/03-the-mapping-phase.md#L273-L276"
+            },
+            {
+              "name": "Receive council-land determination from GIS service",
+              "order": 3,
+              "movementType": "E",
+              "dataGroupRef": "Council Land Determination",
+              "note": "Response back from the GIS functional user is one Entry, analyzed as a normal Entry regardless of whether the value indicates the tree is not on council land (error condition).",
+              "citation": "manuals-indexed/part-2-mm-guidelines-v5-0-sep-2024/03-the-mapping-phase.md#L273-L276"
+            },
+            {
+              "name": "Persist works request with assigned priority",
+              "order": 4,
+              "movementType": "W",
+              "dataGroupRef": "Tree Works Request",
+              "note": "Create/store the works request = one Write. Assigning priority based on the reported hazard is data manipulation to create the attributes written and is accounted for by the Write (no separate movement).",
+              "citation": "manuals-indexed/part-1-mm-principles-definitions-rules-v5-0-aug-2021/04-mapping-phase.md#L141-L146"
+            },
+            {
+              "name": "Notify Parks & Gardens crew",
+              "order": 5,
+              "movementType": "X",
+              "dataGroupRef": "Crew Notification",
+              "note": "Exit sending work-assignment data to the crew functional user (Rule 17).",
+              "citation": "manuals-indexed/part-1-mm-principles-definitions-rules-v5-0-aug-2021/04-mapping-phase.md#L128-L133"
+            },
+            {
+              "name": "Send acknowledgement email to resident",
+              "order": 6,
+              "movementType": "X",
+              "dataGroupRef": "Resident Acknowledgement",
+              "note": "Exit to the resident functional user; the acknowledgement carries additional data (expected response time) beyond a bare confirmation, so it is counted as its own Exit rather than folded into the generic confirmation/error Exit.",
+              "citation": "manuals-indexed/part-2-mm-guidelines-v5-0-sep-2024/03-the-mapping-phase.md#L265-L279"
+            }
+          ],
+          "cfp": 6
+        }
+      ],
+      "gaps": [
+        {
+          "gapId": "CG-E02-01",
+          "category": "Measurement Gap",
+          "gapOrQuestion": "The description says the agent 'captures... photos if emailed in.' It is unclear whether emailed-in photos are received by this functional process as a distinct entered object of interest (a separate Entry for a Photo/Attachment data group) or are merely referenced/handled outside the measured software. No dedicated attachment-handling FUR is given.",
+          "impactOrNotes": "CFP swing +1: if photos constitute a distinct entered data group per Rule 13, add one Entry (7 CFP total). If they are just email attachments outside the measured boundary, no movement (6 CFP)."
+        },
+        {
+          "gapId": "CG-E02-02",
+          "category": "Measurement Gap",
+          "gapOrQuestion": "The 'not on council land' outcome is not described. If a distinct rejection/redirect message is sent to the resident, under the primer's confirmation/error rule all such messages from one FP collapse into a single Exit, but if the rejection carries additional distinct data (e.g., referral to the correct authority) it could be a separate data-carrying Exit.",
+          "impactOrNotes": "CFP swing 0 to +1: collapses into the existing resident Exit under part-2 §3.3.4 unless a genuinely additional data group is returned on rejection."
+        }
+      ],
+      "caveats": [
+        "Treated the epic as a single functional process because all activity flows from one triggering event (the agent capturing/submitting the resident's request); no second independent triggering event is described.",
+        "Priority assignment is treated as data manipulation absorbed by the Write per part-1 Rule 19b; no reference-data Read is counted because the priority is derived from the already-entered reported hazard, not from a stored lookup (none is described).",
+        "External GIS council-land check is sized as an Exit+Entry round-trip per the primer, derived from the general functional-user rule (part-2 §3.3.4) rather than a Salesforce-specific worked example.",
+        "Crew and resident are treated as distinct functional users, so their notifications are separate Exits with distinct data groups."
+      ]
+    },
+    {
+      "epicId": "E03",
+      "epicName": "Check Rates Payment Status",
+      "epicCfp": 4,
+      "confidence": "Assumed",
+      "functionalUsers": [
+        "Call-centre agent (human, via the app UI)",
+        "Finance system (separate software application)"
+      ],
+      "functionalProcesses": [
+        {
+          "functionalProcessId": "FP1-CheckRatesPaymentStatus",
+          "artifact": {
+            "type": "epic",
+            "name": "E03 Check Rates Payment Status"
+          },
+          "dataGroups": [
+            {
+              "name": "Rate Account Lookup",
+              "description": "Identification data the agent uses to locate the rate (property tax) account: property number or address."
+            },
+            {
+              "name": "Rate Payment Status",
+              "description": "Payment position of the rate account: current balance, last payment date and amount, arrears, and next instalment due date."
+            }
+          ],
+          "dataMovements": [
+            {
+              "name": "Enter property number/address",
+              "order": 1,
+              "movementType": "E",
+              "dataGroupRef": "Rate Account Lookup",
+              "note": "Triggering Entry: agent (functional user) submits the lookup, informing the functional process of the triggering event; a single Entry starts the process.",
+              "citation": "manuals-indexed/part-1-mm-principles-definitions-rules-v5-0-aug-2021/04-mapping-phase.md#L24-L99"
+            },
+            {
+              "name": "Query finance system for account payments",
+              "order": 2,
+              "movementType": "X",
+              "dataGroupRef": "Rate Account Lookup",
+              "note": "External-system round-trip: the finance system is a software functional user, so the outbound request is an Exit analyzed by normal COSMIC rules (primer rule 1). Single Exit for all data describing the one object of interest (Rule 14).",
+              "citation": "manuals-indexed/part-2-mm-guidelines-v5-0-sep-2024/03-the-mapping-phase.md#L273-L276"
+            },
+            {
+              "name": "Receive payment details from finance system",
+              "order": 3,
+              "movementType": "E",
+              "dataGroupRef": "Rate Payment Status",
+              "note": "External-system round-trip: response from the finance-system functional user is an Entry (balance, last payment date/amount, arrears, next instalment) analyzed by normal COSMIC rules (primer rule 1).",
+              "citation": "manuals-indexed/part-2-mm-guidelines-v5-0-sep-2024/03-the-mapping-phase.md#L273-L276"
+            },
+            {
+              "name": "Display payment status to agent",
+              "order": 4,
+              "movementType": "X",
+              "dataGroupRef": "Rate Payment Status",
+              "note": "Single Exit for all data describing the one object of interest (the account's payment status) shown to the agent, who reads it back to the caller (Rule 14).",
+              "citation": "manuals-indexed/part-1-mm-principles-definitions-rules-v5-0-aug-2021/04-mapping-phase.md#L100-L105"
+            }
+          ],
+          "cfp": 4
+        }
+      ],
+      "gaps": [
+        {
+          "gapId": "CG-E03-01",
+          "category": "Measurement Gap",
+          "gapOrQuestion": "The FUR does not explicitly state any error/confirmation message (e.g. 'no matching rate account found' when the property number/address does not resolve). If such a message is required, primer rule 3 collapses all error/confirmation messages into a single additional Exit.",
+          "impactOrNotes": "CFP swing +1 (one error/confirmation Exit) if the process must report an account-not-found or similar condition. Not counted to avoid inventing a movement not stated in the FUR."
+        },
+        {
+          "gapId": "CG-E03-02",
+          "category": "Measurement Gap",
+          "gapOrQuestion": "Boundary of the 'finance system': it is modeled here as a separate software functional user, giving an Exit (request) + Entry (response) round-trip (primer rule 1). If the finance data is instead persistent storage accessed directly by the measured software, the pair collapses to a single Read (Rule 18).",
+          "impactOrNotes": "CFP swing -1 (from 4 to 3) if finance retrieval is a Read of persistent storage rather than a round-trip to a separate application. The epic names a distinct 'finance system', so the round-trip interpretation was chosen."
+        },
+        {
+          "gapId": "CG-E03-03",
+          "category": "Measurement Gap",
+          "gapOrQuestion": "Identity verification ('After identity verification, the agent looks up...') is referenced but is owned by dependency epic E10 and is therefore excluded from this measurement.",
+          "impactOrNotes": "No CFP impact on E03. If identity verification were in scope for E03 it would add at least one further functional process; assumed measured under E10 to avoid double counting."
+        }
+      ],
+      "caveats": [
+        "Finance-system interaction modeled as an external round-trip (Exit+Entry) because the epic names a distinct 'finance system'; see CG-E03-02 for the Read alternative.",
+        "Error/confirmation Exit not counted because the FUR does not state one; see CG-E03-01.",
+        "Identity verification excluded as it belongs to dependency epic E10 (CG-E03-03).",
+        "The Entry from the finance system and the Exit to the agent carry the same object of interest (payment status), so they are treated as one data group moved by two different movement types."
+      ]
+    },
+    {
+      "epicId": "E04",
+      "epicName": "Set Up a Rates Payment Plan",
+      "epicCfp": 6,
+      "confidence": "Assumed",
+      "functionalUsers": [
+        "Rates agent (human functional user who captures and submits the proposed plan and receives the validation/confirmation)",
+        "Resident's rate account / persistent rates store (object of interest read and written)",
+        "Post/email delivery system (software functional user that receives the written confirmation for dispatch to the resident)"
+      ],
+      "functionalProcesses": [
+        {
+          "functionalProcessId": "FP1-SetUpPaymentPlan",
+          "artifact": {
+            "type": "epic",
+            "name": "Set Up a Rates Payment Plan"
+          },
+          "dataGroups": [
+            {
+              "name": "Proposed Payment Plan",
+              "description": "Agent-entered instalment amount, payment frequency and target rate-account reference for the resident in arrears."
+            },
+            {
+              "name": "Hardship Policy Limits",
+              "description": "Council hardship-policy thresholds and rules the proposed plan must satisfy (e.g. min instalment, max term)."
+            },
+            {
+              "name": "Rate Account",
+              "description": "The resident's rates account carrying the outstanding arrears balance needed to validate the plan and compute the schedule."
+            },
+            {
+              "name": "Payment Arrangement",
+              "description": "The accepted instalment arrangement and calculated repayment schedule persisted against the rate account."
+            },
+            {
+              "name": "Validation Result",
+              "description": "Error/confirmation indication returned to the agent stating whether the proposed plan was accepted or rejected against policy."
+            },
+            {
+              "name": "Payment Plan Confirmation",
+              "description": "Written confirmation document (plan terms and schedule) handed to the post/email channel for dispatch to the resident."
+            }
+          ],
+          "dataMovements": [
+            {
+              "name": "Enter proposed payment plan",
+              "order": 1,
+              "movementType": "E",
+              "dataGroupRef": "Proposed Payment Plan",
+              "note": "Single triggering Entry: the agent submits the proposed instalment amount/frequency, initiating the functional process; all responses belong to this one FP.",
+              "citation": "manuals-indexed/part-1-mm-principles-definitions-rules-v5-0-aug-2021/04-mapping-phase.md#L24-L99"
+            },
+            {
+              "name": "Read hardship policy limits",
+              "order": 2,
+              "movementType": "R",
+              "dataGroupRef": "Hardship Policy Limits",
+              "note": "Retrieval of one persistent data group; logical validation of the plan against these limits is manipulation accounted for within the Read.",
+              "citation": "manuals-indexed/part-1-mm-principles-definitions-rules-v5-0-aug-2021/04-mapping-phase.md#L134-L140"
+            },
+            {
+              "name": "Read rate account balance",
+              "order": 3,
+              "movementType": "R",
+              "dataGroupRef": "Rate Account",
+              "note": "Retrieval of the persistent rate account (outstanding arrears) required to validate and to calculate the instalment schedule; distinct object of interest from the policy limits.",
+              "citation": "manuals-indexed/part-1-mm-principles-definitions-rules-v5-0-aug-2021/04-mapping-phase.md#L134-L140"
+            },
+            {
+              "name": "Return validation result to agent",
+              "order": 4,
+              "movementType": "X",
+              "dataGroupRef": "Validation Result",
+              "note": "The single Exit accounting for all error/confirmation messages the FP issues to the agent (plan accepted vs. rejected against policy).",
+              "citation": "manuals-indexed/part-2-mm-guidelines-v5-0-sep-2024/03-the-mapping-phase.md#L265-L279"
+            },
+            {
+              "name": "Write payment arrangement to account",
+              "order": 5,
+              "movementType": "W",
+              "dataGroupRef": "Payment Arrangement",
+              "note": "Persisting the arrangement/schedule is one Write; the mathematical computation of the schedule is manipulation accounted for within the Write (Rule 19b).",
+              "citation": "manuals-indexed/part-1-mm-principles-definitions-rules-v5-0-aug-2021/04-mapping-phase.md#L141-L147"
+            },
+            {
+              "name": "Issue written confirmation to resident",
+              "order": 6,
+              "movementType": "X",
+              "dataGroupRef": "Payment Plan Confirmation",
+              "note": "Data issued to a software/hardware functional user (post/email channel) analyzed as a normal Exit; carries additional data (plan terms/schedule) beyond the agent's confirmation, so it is a separate Exit.",
+              "citation": "manuals-indexed/part-2-mm-guidelines-v5-0-sep-2024/03-the-mapping-phase.md#L272-L276"
+            }
+          ],
+          "cfp": 6
+        }
+      ],
+      "gaps": [
+        {
+          "gapId": "CG-E04-01",
+          "category": "Measurement Gap",
+          "gapOrQuestion": "The epic says the system 'calculates the schedule' but does not state whether schedule calculation requires reading additional persistent reference data (e.g. interest/penalty rate configuration or a rates calendar) beyond the rate account balance. If such config is read, an extra Read (+1 CFP) applies.",
+          "impactOrNotes": "CFP swing: +1 (one additional Read) if a rate/fee configuration data group is read to compute instalments. Not counted here to avoid inventing a movement; FP1 modelled at 6 CFP without it."
+        },
+        {
+          "gapId": "CG-E04-02",
+          "category": "Measurement Gap",
+          "gapOrQuestion": "Whether the arrears/eligibility state that qualifies the resident (dependency on E03) is verified within this FP via a Read of a separate object of interest, or whether the Rate Account read already covers it. Assumed covered by the Rate Account read.",
+          "impactOrNotes": "CFP swing: +1 (one additional Read) if a distinct eligibility/arrears-status object must be read separately from the Rate Account."
+        },
+        {
+          "gapId": "CG-E04-03",
+          "category": "Measurement Gap",
+          "gapOrQuestion": "Whether 'by post or email' represents two distinct functional users requiring two Exits, or a single dispatch channel (one Exit). Modelled as one Exit; per Rule 15 the same Exit type/data group counts once regardless of channel.",
+          "impactOrNotes": "CFP swing: 0 under Rule 15 (single data group). No swing expected; noted for transparency on channel modelling."
+        }
+      ]
+    },
+    {
+      "epicId": "E05",
+      "epicName": "Report a Pothole or Road Defect",
+      "epicCfp": 6,
+      "confidence": "Assumed",
+      "functionalUsers": [
+        "Agent (call handler capturing the report)",
+        "Caller (resident who receives the tracking reference)"
+      ],
+      "functionalProcesses": [
+        {
+          "functionalProcessId": "FP1-ReportRoadDefect",
+          "artifact": {
+            "type": "epic",
+            "name": "Report a Pothole or Road Defect"
+          },
+          "dataGroups": [
+            {
+              "name": "Defect Report",
+              "description": "Captured location, defect type, and severity of the road defect reported by the resident."
+            },
+            {
+              "name": "Existing Road Defect",
+              "description": "Persistent road-defect case records queried to detect a duplicate at the same location within a radius."
+            },
+            {
+              "name": "Road Defect Works Order",
+              "description": "Newly created works order for the road defect, owned by / assigned to the Roads team."
+            },
+            {
+              "name": "Caller Case Link",
+              "description": "Association linking the reporting caller to the matched existing defect case in the duplicate branch."
+            },
+            {
+              "name": "Case Tracking Reference",
+              "description": "Case reference/identifier returned to the caller so they can track the reported defect."
+            },
+            {
+              "name": "Confirmation/Error Message",
+              "description": "Validation, error, and confirmation feedback for the report-submission process."
+            }
+          ],
+          "dataMovements": [
+            {
+              "name": "Submit defect report",
+              "order": 1,
+              "movementType": "E",
+              "dataGroupRef": "Defect Report",
+              "note": "Single triggering Entry starting the functional process; carries location, defect type and severity as one data group. All response branches (duplicate vs new) belong to this one FP.",
+              "citation": "manuals-indexed/part-1-mm-principles-definitions-rules-v5-0-aug-2021/04-mapping-phase.md#L24-L99"
+            },
+            {
+              "name": "Check for duplicate defect within radius",
+              "order": 2,
+              "movementType": "R",
+              "dataGroupRef": "Existing Road Defect",
+              "note": "Read of persistent road-defect records to detect a duplicate at the same location within a radius; one Read per data group.",
+              "citation": "manuals-indexed/part-1-mm-principles-definitions-rules-v5-0-aug-2021/04-mapping-phase.md#L134-L140"
+            },
+            {
+              "name": "Create road-defect works order (assigned to Roads team)",
+              "order": 3,
+              "movementType": "W",
+              "dataGroupRef": "Road Defect Works Order",
+              "note": "No-duplicate branch: creating the works order writes one data group to persistent storage; the Roads-team assignment is an attribute created within this Write, not a separate movement.",
+              "citation": "manuals-indexed/part-1-mm-principles-definitions-rules-v5-0-aug-2021/04-mapping-phase.md#L141-L146"
+            },
+            {
+              "name": "Link caller to existing case",
+              "order": 4,
+              "movementType": "W",
+              "dataGroupRef": "Caller Case Link",
+              "note": "Duplicate branch: associating the caller with the matched existing case persists a data group (one Write).",
+              "citation": "manuals-indexed/part-1-mm-principles-definitions-rules-v5-0-aug-2021/04-mapping-phase.md#L141-L146"
+            },
+            {
+              "name": "Return tracking reference to caller",
+              "order": 5,
+              "movementType": "X",
+              "dataGroupRef": "Case Tracking Reference",
+              "note": "The tracking reference is data provided in addition to a confirmation, so it is a separate Exit data group beyond the generic confirmation Exit.",
+              "citation": "manuals-indexed/part-2-mm-guidelines-v5-0-sep-2024/03-the-mapping-phase.md#L270-L272"
+            },
+            {
+              "name": "Confirmation / error message",
+              "order": 6,
+              "movementType": "X",
+              "dataGroupRef": "Confirmation/Error Message",
+              "note": "One Exit accounts for all error/confirmation messages issued by the functional process from all causes; errors arising from the Read/Write add no further movement.",
+              "citation": "manuals-indexed/part-2-mm-guidelines-v5-0-sep-2024/03-the-mapping-phase.md#L267-L269"
+            }
+          ],
+          "cfp": 6
+        }
+      ],
+      "gaps": [
+        {
+          "gapId": "CG-E05-01",
+          "category": "Measurement Gap",
+          "gapOrQuestion": "Does 'assigns it to the Roads team' merely set an owner/assignment attribute on the works order (counted within the Create Write, as measured), or does it also send a distinct notification to the Roads team as a separate functional user? If the latter, that outbound notification is an additional Exit.",
+          "impactOrNotes": "CFP swing +1 (one additional Exit to the Roads team) if assignment triggers a separate notification data movement to a distinct functional user."
+        },
+        {
+          "gapId": "CG-E05-02",
+          "category": "Measurement Gap",
+          "gapOrQuestion": "The epic states the caller is linked to the case but does not specify how the caller is identified. If the process must look up / retrieve caller (contact) data from persistent storage before linking, that is an additional Read not currently counted.",
+          "impactOrNotes": "CFP swing +1 (one additional Read of a Caller/Contact data group) if caller identification requires a persistent-storage lookup within this process."
+        }
+      ]
+    },
+    {
+      "epicId": "E06",
+      "epicName": "Book a Hard Rubbish Collection",
+      "epicCfp": 8,
+      "confidence": "Assumed",
+      "functionalUsers": [
+        "Agent (books the collection on behalf of the resident)",
+        "Waste scheduling service (external software)",
+        "SMS gateway / resident via SMS (external service receiving the confirmation)"
+      ],
+      "functionalProcesses": [
+        {
+          "functionalProcessId": "FP1-BookHardRubbishCollection",
+          "artifact": {
+            "type": "epic",
+            "name": "E06 Book a Hard Rubbish Collection"
+          },
+          "dataGroups": [
+            {
+              "name": "Booking",
+              "description": "The hard/bulky waste collection booking: resident address, item types and counts, preferred collection window, and (once allocated) the collection date. Same object of interest whether entered by the agent or written to storage."
+            },
+            {
+              "name": "Resident Collection Allowance",
+              "description": "The resident's free-collection entitlement/usage for the year, used to check remaining free collections before allowing the booking."
+            },
+            {
+              "name": "Accepted Item Categories",
+              "description": "Reference catalogue of item categories accepted for hard rubbish collection, used to validate the entered items."
+            },
+            {
+              "name": "Scheduling Request",
+              "description": "The outbound request to the waste scheduling service asking for the next available collection date (carries location/window/volume context)."
+            },
+            {
+              "name": "Allocated Collection Date",
+              "description": "The next available collection date returned by the waste scheduling service."
+            },
+            {
+              "name": "Booking Confirmation",
+              "description": "The confirmation of the booking sent to the resident by SMS, carrying the allocated date and booking summary."
+            },
+            {
+              "name": "Error/Confirmation Message",
+              "description": "On-screen confirmation or error indication to the agent (e.g. no free collections remaining, item not in accepted categories, booking success)."
+            }
+          ],
+          "dataMovements": [
+            {
+              "name": "Enter booking details",
+              "order": 1,
+              "movementType": "E",
+              "dataGroupRef": "Booking",
+              "note": "Single triggering Entry: agent submits address, item types/counts and preferred window, detecting the 'book collection' event. All responses to this Entry belong to this one functional process.",
+              "citation": "manuals-indexed/part-1-mm-principles-definitions-rules-v5-0-aug-2021/04-mapping-phase.md#L24-L99"
+            },
+            {
+              "name": "Read remaining free collections",
+              "order": 2,
+              "movementType": "R",
+              "dataGroupRef": "Resident Collection Allowance",
+              "note": "Retrieving the resident's free-collection entitlement/usage from persistent storage = one Read per data group.",
+              "citation": "manuals-indexed/part-1-mm-principles-definitions-rules-v5-0-aug-2021/04-mapping-phase.md#L134-L149"
+            },
+            {
+              "name": "Read accepted item categories",
+              "order": 3,
+              "movementType": "R",
+              "dataGroupRef": "Accepted Item Categories",
+              "note": "Retrieving the accepted-categories reference data from persistent storage to validate the items = one Read. (Assumes categories are persisted; see gap CG-E06-02.)",
+              "citation": "manuals-indexed/part-1-mm-principles-definitions-rules-v5-0-aug-2021/04-mapping-phase.md#L134-L149"
+            },
+            {
+              "name": "Request next available date",
+              "order": 4,
+              "movementType": "X",
+              "dataGroupRef": "Scheduling Request",
+              "note": "External-system round-trip: the request out to the waste scheduling service (a functional user) is one Exit, analyzed by normal COSMIC rules.",
+              "citation": "manuals-indexed/part-2-mm-guidelines-v5-0-sep-2024/03-the-mapping-phase.md#L273-L276"
+            },
+            {
+              "name": "Receive allocated collection date",
+              "order": 5,
+              "movementType": "E",
+              "dataGroupRef": "Allocated Collection Date",
+              "note": "External-system round-trip: the response back in from the waste scheduling service is one Entry, regardless of whether it signals an error.",
+              "citation": "manuals-indexed/part-2-mm-guidelines-v5-0-sep-2024/03-the-mapping-phase.md#L273-L276"
+            },
+            {
+              "name": "Persist booking",
+              "order": 6,
+              "movementType": "W",
+              "dataGroupRef": "Booking",
+              "note": "Creating the booking in persistent storage = one Write. Same object of interest as the entered booking, so it is the one 'Booking' data group, not two.",
+              "citation": "manuals-indexed/part-1-mm-principles-definitions-rules-v5-0-aug-2021/04-mapping-phase.md#L134-L149"
+            },
+            {
+              "name": "Send SMS confirmation",
+              "order": 7,
+              "movementType": "X",
+              "dataGroupRef": "Booking Confirmation",
+              "note": "Confirmation sent to the resident/SMS gateway (a functional user) is an Exit carrying booking data in addition to a bare confirmation, so it is a distinct Exit from the agent-facing message.",
+              "citation": "manuals-indexed/part-2-mm-guidelines-v5-0-sep-2024/03-the-mapping-phase.md#L265-L279"
+            },
+            {
+              "name": "Return confirmation/error to agent",
+              "order": 8,
+              "movementType": "X",
+              "dataGroupRef": "Error/Confirmation Message",
+              "note": "One Exit accounts for all error/confirmation messages the process issues to the agent (no free collections, invalid item, or success). Errors arising from the Reads/Write add no further movement.",
+              "citation": "manuals-indexed/part-2-mm-guidelines-v5-0-sep-2024/03-the-mapping-phase.md#L265-L279"
+            }
+          ],
+          "cfp": 8
+        }
+      ],
+      "gaps": [
+        {
+          "gapId": "CG-E06-01",
+          "category": "Measurement Gap",
+          "gapOrQuestion": "Does booking a collection separately update/decrement the resident's free-collection allowance (a Write to 'Resident Collection Allowance'), or is remaining allowance derived on the fly by counting existing bookings (no separate Write)? The description states the allowance is checked but not whether it is written back.",
+          "impactOrNotes": "CFP swing +1 (9 CFP) if a separate Write to the allowance object is required; 8 CFP as measured if usage is derived rather than stored."
+        },
+        {
+          "gapId": "CG-E06-02",
+          "category": "Measurement Gap",
+          "gapOrQuestion": "Are the accepted item categories held in persistent storage (Read at order 3), or are they hardcoded/configuration constants that are not a persisted object of interest?",
+          "impactOrNotes": "CFP swing -1 (7 CFP) if categories are not persistent data (no Read); 8 CFP as measured assuming they are read from storage."
+        },
+        {
+          "gapId": "CG-E06-03",
+          "category": "Measurement Gap",
+          "gapOrQuestion": "Is the waste scheduling service an independent external software functional user (round-trip = Exit + Entry), or an in-scope component whose date lookup would instead be a Read of persistent schedule data (one Read)?",
+          "impactOrNotes": "CFP swing -1 (7 CFP) if it collapses to a single Read instead of an Exit+Entry pair; 8 CFP as measured treating it as an external functional user per primer rule 1."
+        }
+      ]
+    },
+    {
+      "epicId": "E07",
+      "epicName": "Lodge a Noise or Nuisance Complaint",
+      "epicCfp": 5,
+      "confidence": "Assumed",
+      "functionalUsers": [
+        "Council agent (records the complaint)",
+        "Complainant / resident (receives case reference)",
+        "Local Laws / Environmental Health team (receives routed case)"
+      ],
+      "functionalProcesses": [
+        {
+          "functionalProcessId": "FP1-LodgeComplaint",
+          "artifact": {
+            "type": "epic",
+            "name": "Lodge a Noise or Nuisance Complaint"
+          },
+          "dataGroups": [
+            {
+              "name": "Nuisance Complaint",
+              "description": "The reported nuisance: nature/category of complaint, offending address, and dates/times of occurrence."
+            },
+            {
+              "name": "Complainant",
+              "description": "The reporting resident's contact details and their anonymity preference."
+            },
+            {
+              "name": "Regulatory Case",
+              "description": "The persisted regulatory case record, including status and the assigned Local Laws / Environmental Health owner/queue."
+            },
+            {
+              "name": "Case Reference",
+              "description": "The case identifier acknowledgment delivered to the complainant confirming lodgement."
+            },
+            {
+              "name": "Error/Confirmation",
+              "description": "Validation error or success acknowledgment returned to the agent for the lodgement action."
+            }
+          ],
+          "dataMovements": [
+            {
+              "name": "Enter complaint details",
+              "order": 1,
+              "movementType": "E",
+              "dataGroupRef": "Nuisance Complaint",
+              "note": "Triggering Entry: the agent detects the lodgement event and submits the nuisance details (nature, offending address, dates/times). A single triggering Entry starts the process.",
+              "citation": "manuals-indexed/part-1-mm-principles-definitions-rules-v5-0-aug-2021/04-mapping-phase.md#L17-L37"
+            },
+            {
+              "name": "Enter complainant details",
+              "order": 2,
+              "movementType": "E",
+              "dataGroupRef": "Complainant",
+              "note": "Second Entry for a distinct object of interest (the reporter): contact details and anonymity preference. Additional (non-triggering) Entries are permitted alongside the single triggering Entry.",
+              "citation": "manuals-indexed/part-1-mm-principles-definitions-rules-v5-0-aug-2021/04-mapping-phase.md#L24-L99"
+            },
+            {
+              "name": "Persist regulatory case",
+              "order": 3,
+              "movementType": "W",
+              "dataGroupRef": "Regulatory Case",
+              "note": "Create the regulatory case in persistent storage, including its assigned Local Laws / Environmental Health team/owner (routing modelled as internal assignment persisted with the case). One Write per data group written.",
+              "citation": "manuals-indexed/part-1-mm-principles-definitions-rules-v5-0-aug-2021/04-mapping-phase.md#L134-L149"
+            },
+            {
+              "name": "Send case reference to complainant",
+              "order": 4,
+              "movementType": "X",
+              "dataGroupRef": "Case Reference",
+              "note": "Confirmation to the complainant that also carries additional data (the case reference); additional data in a confirming message is identified as a separate data group moved by an Exit. Occurs unless the complainant is anonymous.",
+              "citation": "manuals-indexed/part-2-mm-guidelines-v5-0-sep-2024/03-the-mapping-phase.md#L265-L279"
+            },
+            {
+              "name": "Return error/confirmation to agent",
+              "order": 5,
+              "movementType": "X",
+              "dataGroupRef": "Error/Confirmation",
+              "note": "One Exit accounts for all error/confirmation messages issued to the agent; error conditions arising from the Read/Write are already accounted for by those movements.",
+              "citation": "manuals-indexed/part-2-mm-guidelines-v5-0-sep-2024/03-the-mapping-phase.md#L265-L279"
+            }
+          ],
+          "cfp": 5
+        }
+      ],
+      "gaps": [
+        {
+          "gapId": "CG-E07-01",
+          "category": "Measurement Gap",
+          "gapOrQuestion": "Routing to the Local Laws / Environmental Health team is modelled as internal owner/queue assignment persisted with the case (part of the Write). If routing instead fires an outbound notification/hand-off to a separate team system that is a functional user, that hand-off would be an additional Exit.",
+          "impactOrNotes": "CFP swing: +1 (5 -> 6) if the team is served by a distinct downstream software/system requiring an Exit rather than internal assignment."
+        },
+        {
+          "gapId": "CG-E07-02",
+          "category": "Measurement Gap",
+          "gapOrQuestion": "Complainant contact/anonymity is treated as a distinct object of interest (second Entry). If the FUR grain treats complainant attributes as part of the same complaint data group (single object of interest captured in one submission), only one triggering Entry exists.",
+          "impactOrNotes": "CFP swing: -1 (5 -> 4) if complainant details collapse into the Nuisance Complaint data group."
+        },
+        {
+          "gapId": "CG-E07-03",
+          "category": "Measurement Gap",
+          "gapOrQuestion": "The epic does not state whether the offending address or complaint category is validated against a persistent reference (property/address register, category list) during lodgement.",
+          "impactOrNotes": "CFP swing: +1 per distinct persistent data group Read (e.g. +1 for an address/property lookup) if such validation Reads exist."
+        }
+      ],
+      "caveats": [
+        "Single functional process identified: one triggering event (agent lodges the complaint). No second process is described in the epic.",
+        "Routing to the team is counted as internal case assignment (folded into the Write), not a separate Exit — see CG-E07-01.",
+        "Complainant modelled as a separate object of interest yielding a second Entry — see CG-E07-02; this is the primary driver of the Assumed confidence.",
+        "No persistent-data Read is counted because the epic does not describe any address/category validation lookup — see CG-E07-03.",
+        "All movements are justified from the shared primer citations (Rules 10/13 for Entries, Rules 18-20 for the Write, part-2 error/confirmation guidance for both Exits); no additional manual adjudication was required."
+      ]
+    },
+    {
+      "epicId": "E08",
+      "epicName": "Apply for a Parking Permit",
+      "epicCfp": 11,
+      "confidence": "Assumed",
+      "functionalUsers": [
+        "Parking permit agent (human functional user who captures data and triggers the application)",
+        "Property register system",
+        "Payment system",
+        "Email/notification system"
+      ],
+      "functionalProcesses": [
+        {
+          "functionalProcessId": "FP1-ApplyForParkingPermit",
+          "artifact": {
+            "type": "epic",
+            "name": "Apply for a Parking Permit"
+          },
+          "dataGroups": [
+            {
+              "name": "Permit Application",
+              "description": "Applicant-supplied application payload: vehicle registration, residential address, and requested permit type."
+            },
+            {
+              "name": "Property Record",
+              "description": "Persistent property-register entry used to confirm the applicant resides at the stated address."
+            },
+            {
+              "name": "Issued Permit",
+              "description": "Persistent records of permits already granted to the address, read to tally the current count for the allowance check."
+            },
+            {
+              "name": "Permit Allowance",
+              "description": "Configured per-address (or per permit-type) maximum number of permits allowed, used as the ceiling in the eligibility check."
+            },
+            {
+              "name": "Fee Schedule",
+              "description": "Persistent rate/pricing rules read to derive the payable permit fee."
+            },
+            {
+              "name": "Payment",
+              "description": "Payment request sent to and the settlement/authorization result returned from the external payment system."
+            },
+            {
+              "name": "Parking Permit",
+              "description": "The newly created digital permit record (permit id, vehicle, address, type, validity) that is persisted and issued back to the applicant."
+            },
+            {
+              "name": "Confirmation Email",
+              "description": "Notification content dispatched to the email system confirming that the permit was issued."
+            },
+            {
+              "name": "Application Status",
+              "description": "The single error/confirmation outcome message covering all success and failure paths (e.g. residency failed, allowance exceeded, payment declined, permit issued)."
+            }
+          ],
+          "dataMovements": [
+            {
+              "name": "Submit permit application",
+              "order": 1,
+              "movementType": "E",
+              "dataGroupRef": "Permit Application",
+              "note": "Single triggering Entry: the agent submits vehicle registration, address and permit type, detecting the triggering event that starts the functional process; all subsequent movements are responses to this one Entry (primer item 5).",
+              "citation": "manuals-indexed/part-1-mm-principles-definitions-rules-v5-0-aug-2021/04-mapping-phase.md#L24-L99"
+            },
+            {
+              "name": "Read property register for residency",
+              "order": 2,
+              "movementType": "R",
+              "dataGroupRef": "Property Record",
+              "note": "Retrieving persistent property-register data to verify residency = one Read per data group (primer item 2).",
+              "citation": "manuals-indexed/part-1-mm-principles-definitions-rules-v5-0-aug-2021/04-mapping-phase.md#L134-L149"
+            },
+            {
+              "name": "Read permits already issued to address",
+              "order": 3,
+              "movementType": "R",
+              "dataGroupRef": "Issued Permit",
+              "note": "Retrieving persistent issued-permit data to count permits for the address = one Read (primer item 2).",
+              "citation": "manuals-indexed/part-1-mm-principles-definitions-rules-v5-0-aug-2021/04-mapping-phase.md#L134-L149"
+            },
+            {
+              "name": "Read permit allowance limit",
+              "order": 4,
+              "movementType": "R",
+              "dataGroupRef": "Permit Allowance",
+              "note": "Retrieving the configured allowance ceiling to compare against the issued count = one Read; treated as a distinct persistent data group (primer item 2). See gap CG-E08-02.",
+              "citation": "manuals-indexed/part-1-mm-principles-definitions-rules-v5-0-aug-2021/04-mapping-phase.md#L134-L149"
+            },
+            {
+              "name": "Read fee schedule",
+              "order": 5,
+              "movementType": "R",
+              "dataGroupRef": "Fee Schedule",
+              "note": "Fee calculation is data manipulation (no movement); reading the persistent fee rates to calculate the fee = one Read (primer item 2). See gap CG-E08-03.",
+              "citation": "manuals-indexed/part-1-mm-principles-definitions-rules-v5-0-aug-2021/04-mapping-phase.md#L134-L149"
+            },
+            {
+              "name": "Send payment request to payment system",
+              "order": 6,
+              "movementType": "X",
+              "dataGroupRef": "Payment",
+              "note": "External-system round-trip: the request out to the payment system (a functional user) is one Exit (primer item 1).",
+              "citation": "manuals-indexed/part-2-mm-guidelines-v5-0-sep-2024/03-the-mapping-phase.md#L273-L276"
+            },
+            {
+              "name": "Receive payment result",
+              "order": 7,
+              "movementType": "E",
+              "dataGroupRef": "Payment",
+              "note": "External-system round-trip: the payment/authorization response back in is one Entry, analyzed as a normal Entry regardless of success/failure (primer item 1).",
+              "citation": "manuals-indexed/part-2-mm-guidelines-v5-0-sep-2024/03-the-mapping-phase.md#L273-L276"
+            },
+            {
+              "name": "Persist digital permit",
+              "order": 8,
+              "movementType": "W",
+              "dataGroupRef": "Parking Permit",
+              "note": "Creating the digital permit in persistent storage = one Write (primer item 2).",
+              "citation": "manuals-indexed/part-1-mm-principles-definitions-rules-v5-0-aug-2021/04-mapping-phase.md#L134-L149"
+            },
+            {
+              "name": "Issue digital permit to applicant",
+              "order": 9,
+              "movementType": "X",
+              "dataGroupRef": "Parking Permit",
+              "note": "Returning the issued digital permit to the functional user is an Exit carrying data beyond a bare confirmation, so it is a separate Exit (primer item 3).",
+              "citation": "manuals-indexed/part-2-mm-guidelines-v5-0-sep-2024/03-the-mapping-phase.md#L265-L279"
+            },
+            {
+              "name": "Send confirmation email",
+              "order": 10,
+              "movementType": "X",
+              "dataGroupRef": "Confirmation Email",
+              "note": "Sending the confirmation email to the email system (a functional user) is an Exit; its content is additional data, so a separate Exit (primer items 1 and 3).",
+              "citation": "manuals-indexed/part-2-mm-guidelines-v5-0-sep-2024/03-the-mapping-phase.md#L265-L279"
+            },
+            {
+              "name": "Return application status / error message",
+              "order": 11,
+              "movementType": "X",
+              "dataGroupRef": "Application Status",
+              "note": "One Exit accounts for all error/confirmation messages of the process (residency failed, allowance exceeded, payment declined, or success); Read/Write error reporting adds no further movement (primer item 3).",
+              "citation": "manuals-indexed/part-2-mm-guidelines-v5-0-sep-2024/03-the-mapping-phase.md#L265-L279"
+            }
+          ],
+          "cfp": 11
+        }
+      ],
+      "gaps": [
+        {
+          "gapId": "CG-E08-01",
+          "category": "Measurement Gap",
+          "gapOrQuestion": "Is the property register the measured software's own persistent storage (modeled here as one Read) or a separate piece of software / external functional user? If external, the residency check becomes an Exit+Entry round-trip.",
+          "impactOrNotes": "CFP swing +1 (an Entry would be added if the property register is an external system rather than persistent storage). E08 depends_on E10/E11, which may host this register."
+        },
+        {
+          "gapId": "CG-E08-02",
+          "category": "Measurement Gap",
+          "gapOrQuestion": "Is the permit allowance a separately stored/read data group, or an attribute retrieved together with the issued-permit or permit-type data (thus not a distinct Read)?",
+          "impactOrNotes": "CFP swing -1 if the allowance is not a distinct data-group Read."
+        },
+        {
+          "gapId": "CG-E08-03",
+          "category": "Measurement Gap",
+          "gapOrQuestion": "Does fee calculation read persistent fee-rate data (a Read, as counted), or is the fee entered/passed with the application or fixed constant (no Read)?",
+          "impactOrNotes": "CFP swing -1 if no persistent fee-schedule Read occurs."
+        },
+        {
+          "gapId": "CG-E08-04",
+          "category": "Measurement Gap",
+          "gapOrQuestion": "How is payment handled? Are payment details captured as an additional Entry from the agent, and is a payment/transaction record persisted (a Write)? Modeled here only as a payment-system Exit+Entry round-trip.",
+          "impactOrNotes": "CFP swing +1 to +2 if a distinct payment-details Entry and/or a payment-record Write are in scope."
+        },
+        {
+          "gapId": "CG-E08-05",
+          "category": "Measurement Gap",
+          "gapOrQuestion": "Is 'Apply for a Parking Permit' a single functional process (assumed), or is payment a separately triggered functional process (agent/resident initiates payment as its own triggering event)?",
+          "impactOrNotes": "If split into two functional processes, the total structure and count change (a second FP would add its own triggering Entry and confirmation Exit, roughly +2 CFP)."
+        }
+      ]
+    },
+    {
+      "epicId": "E09",
+      "epicName": "Update Contact Details on Account",
+      "epicCfp": 3,
+      "confidence": "Assumed",
+      "functionalUsers": [
+        "Customer service agent (human user operating the system on the resident's behalf)"
+      ],
+      "functionalProcesses": [
+        {
+          "functionalProcessId": "FP1-UpdateContactDetails",
+          "artifact": {
+            "type": "epic",
+            "name": "Update Contact Details on Account"
+          },
+          "dataGroups": [
+            {
+              "name": "Contact Details",
+              "description": "The resident's phone, email and postal-address attributes on the council customer account, edited by the agent and persisted to the customer master."
+            },
+            {
+              "name": "Update Confirmation",
+              "description": "Confirmation (and any validation-error) message returned to the agent stating the outcome of the contact-detail change."
+            }
+          ],
+          "dataMovements": [
+            {
+              "name": "Enter new contact details",
+              "order": 1,
+              "movementType": "E",
+              "dataGroupRef": "Contact Details",
+              "note": "Single triggering Entry: the agent submits the edited phone/email/postal-address for the account. One Entry initiates the functional process and its FUR-response set.",
+              "citation": "manuals-indexed/part-1-mm-principles-definitions-rules-v5-0-aug-2021/04-mapping-phase.md#L24-L99"
+            },
+            {
+              "name": "Save contact details to customer master",
+              "order": 2,
+              "movementType": "W",
+              "dataGroupRef": "Contact Details",
+              "note": "Persisting the updated contact-detail data group to the customer master is a single Write.",
+              "citation": "manuals-indexed/part-1-mm-principles-definitions-rules-v5-0-aug-2021/04-mapping-phase.md#L134-L149"
+            },
+            {
+              "name": "Confirm change to resident",
+              "order": 3,
+              "movementType": "X",
+              "dataGroupRef": "Update Confirmation",
+              "note": "All confirmation and validation-error messages the functional process can issue collapse into one Exit; error indications arising from the Write add no further movement.",
+              "citation": "manuals-indexed/part-2-mm-guidelines-v5-0-sep-2024/03-the-mapping-phase.md#L265-L279"
+            }
+          ],
+          "cfp": 3
+        }
+      ],
+      "gaps": [
+        {
+          "gapId": "CG-E09-01",
+          "category": "Measurement Gap",
+          "gapOrQuestion": "Does this functional process itself Read the existing customer record from the customer master (to load/display it for editing or to confirm existence) before writing, or was that Read already performed by the E10 identity-verification/account-lookup process? The epic says 'the agent edits the record' but the record retrieval appears to belong to the E10 dependency.",
+          "impactOrNotes": "If a Read of the existing customer record occurs within this FP, add +1 CFP (Read of Contact Details). Base count assumes the record was already retrieved by E10 and no Read is needed here. Swing: +1 CFP (3 -> 4)."
+        },
+        {
+          "gapId": "CG-E09-02",
+          "category": "Measurement Gap",
+          "gapOrQuestion": "Does validation of the new postal address (or email/phone) invoke an external reference/lookup service (e.g. an address/postcode validation system)? The epic states 'the system validates the new details' without specifying whether validation is internal manipulation or a call to another piece of software.",
+          "impactOrNotes": "If an external validation service is called, that service is a functional user and the round-trip adds one Exit (request) + one Entry (response) = +2 CFP. If validation is purely internal data manipulation, it adds 0 CFP (manipulation is not a data movement). Swing: +2 CFP (3 -> 5)."
+        }
+      ],
+      "caveats": [
+        "Identity verification is treated as out of scope for E09 because it is provided by the E10 dependency (depends_on: E10); only the edit-validate-save-confirm flow is measured.",
+        "The resident is not a functional user of the software (they interact with the agent by phone); the sole functional user is the customer-service agent operating the system.",
+        "Confidence is Assumed rather than Confirmed because the presence of a Read within this FP (CG-E09-01) and a possible external validation round-trip (CG-E09-02) are not resolvable from the epic text; the 3-CFP base reflects the minimal defensible decomposition (E/W/X)."
+      ]
+    },
+    {
+      "epicId": "E10",
+      "epicName": "Verify Caller Identity",
+      "epicCfp": 4,
+      "confidence": "Assumed",
+      "functionalUsers": [
+        "Contact-centre agent (human functional user submitting caller answers and receiving the verification outcome)"
+      ],
+      "functionalProcesses": [
+        {
+          "functionalProcessId": "FP1-VerifyCallerIdentity",
+          "artifact": {
+            "type": "epic",
+            "name": "Verify Caller Identity"
+          },
+          "dataGroups": [
+            {
+              "name": "Verification Answers",
+              "description": "The knowledge-based answers the agent supplies for a call (customer name, property address, date of birth and/or account reference) to be checked."
+            },
+            {
+              "name": "Customer Master Record",
+              "description": "The persistent customer identity attributes (stored name, address, DOB, account reference) held in the customer master and used as the source of truth for comparison."
+            },
+            {
+              "name": "Verification Attempt Log",
+              "description": "The persistent audit record of a single verification attempt (outcome, which attributes were checked, time) written against the customer record."
+            },
+            {
+              "name": "Verification Result",
+              "description": "The verified/failed outcome returned to the agent indicating whether the supplied answers matched the customer master."
+            }
+          ],
+          "dataMovements": [
+            {
+              "name": "Submit verification answers",
+              "order": 1,
+              "movementType": "E",
+              "dataGroupRef": "Verification Answers",
+              "note": "Single triggering Entry from the agent (functional user) detecting the 'verify this caller' event; starts the functional process and carries the supplied answers into the software.",
+              "citation": "manuals-indexed/part-1-mm-principles-definitions-rules-v5-0-aug-2021/04-mapping-phase.md#L24-L99"
+            },
+            {
+              "name": "Read customer master for comparison",
+              "order": 2,
+              "movementType": "R",
+              "dataGroupRef": "Customer Master Record",
+              "note": "Retrieving the persistent stored identity attributes to check the supplied answers against is one Read of that data group; any error indication arising from the Read adds no separate movement.",
+              "citation": "manuals-indexed/part-1-mm-principles-definitions-rules-v5-0-aug-2021/04-mapping-phase.md#L134-L149"
+            },
+            {
+              "name": "Write verification attempt log",
+              "order": 3,
+              "movementType": "W",
+              "dataGroupRef": "Verification Attempt Log",
+              "note": "Logging the verification attempt against the customer record moves data to persistent storage = one Write.",
+              "citation": "manuals-indexed/part-1-mm-principles-definitions-rules-v5-0-aug-2021/04-mapping-phase.md#L134-L149"
+            },
+            {
+              "name": "Return verified/failed result to agent",
+              "order": 4,
+              "movementType": "X",
+              "dataGroupRef": "Verification Result",
+              "note": "The verified/failed outcome is the functional response of the process to its triggering Entry, issued to the agent as one Exit; it carries genuine result data (not merely a confirmation), so it is a distinct Exit.",
+              "citation": "manuals-indexed/part-2-mm-guidelines-v5-0-sep-2024/03-the-mapping-phase.md#L265-L279"
+            }
+          ],
+          "cfp": 4
+        }
+      ],
+      "gaps": [
+        {
+          "gapId": "CG-E10-01",
+          "category": "Measurement Gap",
+          "gapOrQuestion": "The description says the agent asks the verification questions but does not state whether the system generates/presents the specific challenge questions (e.g. picks which attributes to ask) before the agent enters answers. If a separate 'request verification questions' functional process exists, it would add a triggering Entry, a Read of the customer master to determine askable attributes, and an Exit of the question set to the agent.",
+          "impactOrNotes": "CFP swing +0 to +3. If the system merely accepts free-form answers (assumed here), only the single 4 CFP process exists. If the system supplies the questions, add one functional process of ~3 CFP (E + R + X), making the epic 7 CFP."
+        },
+        {
+          "gapId": "CG-E10-02",
+          "category": "Measurement Gap",
+          "gapOrQuestion": "It is ambiguous whether 'logging the verification attempt against the customer record' is a separate object of interest (Verification Attempt Log, assumed here) or an update to the Customer Master Record itself. If it is the same object already Read, it is still a distinct Write and does not change the count; but if no logging is actually persisted, the Write disappears.",
+          "impactOrNotes": "CFP swing -1 (down to 3 CFP) only in the case that no verification attempt is persisted. Object-of-interest identity does not change the count as long as a Write occurs."
+        }
+      ]
+    },
+    {
+      "epicId": "E11",
+      "epicName": "Look Up Council Asset by Location",
+      "epicCfp": 5,
+      "confidence": "Assumed",
+      "functionalUsers": [
+        "Agent / calling process (submits location, receives asset result)",
+        "GIS/asset service (external system, round-trip functional user)"
+      ],
+      "functionalProcesses": [
+        {
+          "functionalProcessId": "FP1-LookUpAssetByLocation",
+          "artifact": {
+            "type": "epic",
+            "name": "Look Up Council Asset by Location"
+          },
+          "dataGroups": [
+            {
+              "name": "Location Query",
+              "description": "The address or map-pin coordinates identifying the point at which to look up a council asset."
+            },
+            {
+              "name": "Asset Details",
+              "description": "The asset record returned for the location: council-ownership indicator, asset type/attributes (tree, road, drain, streetlight) and the responsible team."
+            },
+            {
+              "name": "Lookup Status Message",
+              "description": "Confirmation/error indication for the lookup (e.g. invalid address, no council asset found, GIS service unavailable)."
+            }
+          ],
+          "dataMovements": [
+            {
+              "name": "Receive lookup request (address/map pin)",
+              "order": 1,
+              "movementType": "E",
+              "dataGroupRef": "Location Query",
+              "note": "Single triggering Entry that starts the functional process on the event detected by the agent/calling functional user.",
+              "citation": "manuals-indexed/part-1-mm-principles-definitions-rules-v5-0-aug-2021/04-mapping-phase.md#L24-L99"
+            },
+            {
+              "name": "Send location query to GIS/asset service",
+              "order": 2,
+              "movementType": "X",
+              "dataGroupRef": "Location Query",
+              "note": "Request leg of the external-system round-trip: the GIS/asset service is a functional user, so the outbound request is one Exit.",
+              "citation": "manuals-indexed/part-2-mm-guidelines-v5-0-sep-2024/03-the-mapping-phase.md#L273-L276"
+            },
+            {
+              "name": "Receive GIS/asset service response",
+              "order": 3,
+              "movementType": "E",
+              "dataGroupRef": "Asset Details",
+              "note": "Response leg of the round-trip: data received back from the GIS/asset functional user is one Entry, analyzed as normal regardless of whether it signals an error.",
+              "citation": "manuals-indexed/part-2-mm-guidelines-v5-0-sep-2024/03-the-mapping-phase.md#L273-L276"
+            },
+            {
+              "name": "Return asset details and responsible team",
+              "order": 4,
+              "movementType": "X",
+              "dataGroupRef": "Asset Details",
+              "note": "Exit returning the asset ownership/details and responsible team to the agent/calling functional user; same data group with different values (found vs not-council-owned) counts once.",
+              "citation": "manuals-indexed/part-1-mm-principles-definitions-rules-v5-0-aug-2021/04-mapping-phase.md#L106-L109"
+            },
+            {
+              "name": "Issue lookup status/error message",
+              "order": 5,
+              "movementType": "X",
+              "dataGroupRef": "Lookup Status Message",
+              "note": "One Exit accounts for all error/confirmation messages issued by the functional process (invalid address, no asset found, service unavailable). ASSUMED — epic does not explicitly state a status message.",
+              "citation": "manuals-indexed/part-2-mm-guidelines-v5-0-sep-2024/03-the-mapping-phase.md#L265-L279"
+            }
+          ],
+          "cfp": 5
+        }
+      ],
+      "gaps": [
+        {
+          "gapId": "CG-E11-01",
+          "category": "Measurement Gap",
+          "gapOrQuestion": "The epic does not specify error/confirmation handling (invalid address, no council asset found, GIS service unavailable) nor whether lookup results are persisted (cached or audit-logged) to storage owned by this software.",
+          "impactOrNotes": "One error/confirmation Exit (order 5) is included as a defensible standard per primer rule 3 — ASSUMED. If no functional user status message is issued, remove 1 CFP (-> 4). If lookups are cached or audit-logged to persistent storage, add 1 Write per group (-> 6). CFP swing: 4-6."
+        }
+      ]
+    },
+    {
+      "epicId": "E12",
+      "epicName": "Cancel a Hard Rubbish Collection Booking",
+      "epicCfp": 9,
+      "confidence": "Assumed",
+      "functionalUsers": [
+        "Call-centre agent (human user)",
+        "SMS gateway (external system)"
+      ],
+      "functionalProcesses": [
+        {
+          "functionalProcessId": "FP1-LookUpBooking",
+          "artifact": {
+            "type": "epic",
+            "name": "Cancel a Hard Rubbish Collection Booking"
+          },
+          "dataGroups": [
+            {
+              "name": "Booking Search Criteria",
+              "description": "The address or booking reference the agent keys in to locate the resident's existing hard/bulky-waste collection booking."
+            },
+            {
+              "name": "Booking",
+              "description": "The stored hard-rubbish collection booking: collection window, item/bulky-waste details, and current status."
+            }
+          ],
+          "dataMovements": [
+            {
+              "name": "Enter search criteria",
+              "order": 1,
+              "movementType": "E",
+              "dataGroupRef": "Booking Search Criteria",
+              "note": "Single triggering Entry: the agent (functional user) detects the triggering event (caller wants their booking found) and initiates the lookup process.",
+              "citation": "manuals-indexed/part-1-mm-principles-definitions-rules-v5-0-aug-2021/04-mapping-phase.md#L24-L99"
+            },
+            {
+              "name": "Read booking",
+              "order": 2,
+              "movementType": "R",
+              "dataGroupRef": "Booking",
+              "note": "Read retrieves the booking data group (window, items, status) from persistent storage. A 'booking not found' outcome is an error condition of the Read and adds no separate movement.",
+              "citation": "manuals-indexed/part-1-mm-principles-definitions-rules-v5-0-aug-2021/04-mapping-phase.md#L134-L149"
+            },
+            {
+              "name": "Display booking details",
+              "order": 3,
+              "movementType": "X",
+              "dataGroupRef": "Booking",
+              "note": "Exit returning the retrieved booking details to the agent (functional user) so the window and items can be confirmed with the caller; analyzed as a normal Exit.",
+              "citation": "manuals-indexed/part-2-mm-guidelines-v5-0-sep-2024/03-the-mapping-phase.md#L273-L276"
+            }
+          ],
+          "cfp": 3
+        },
+        {
+          "functionalProcessId": "FP2-CancelBooking",
+          "artifact": {
+            "type": "epic",
+            "name": "Cancel a Hard Rubbish Collection Booking"
+          },
+          "dataGroups": [
+            {
+              "name": "Cancellation Request",
+              "description": "The agent's command, on the caller's behalf, to cancel the identified booking."
+            },
+            {
+              "name": "Booking",
+              "description": "The stored booking record whose collection window/status is read to validate cancellability and whose status is then set to cancelled."
+            },
+            {
+              "name": "Resident Allowance",
+              "description": "The resident's annual free hard-rubbish collection entitlement/usage counter that is restored when a booking is cancelled."
+            },
+            {
+              "name": "SMS Confirmation",
+              "description": "The cancellation-confirmation text message addressed to the caller and handed to the SMS gateway."
+            },
+            {
+              "name": "Agent Notification",
+              "description": "The on-screen confirmation or error message shown to the agent (cancelled / window already passed / not found)."
+            }
+          ],
+          "dataMovements": [
+            {
+              "name": "Receive cancel command",
+              "order": 1,
+              "movementType": "E",
+              "dataGroupRef": "Cancellation Request",
+              "note": "Single triggering Entry for a distinct triggering event (agent commands the cancellation), separate from the earlier lookup event.",
+              "citation": "manuals-indexed/part-1-mm-principles-definitions-rules-v5-0-aug-2021/04-mapping-phase.md#L17-L37"
+            },
+            {
+              "name": "Read booking for validation",
+              "order": 2,
+              "movementType": "R",
+              "dataGroupRef": "Booking",
+              "note": "Read retrieves the booking (including collection window/status) to validate that it exists and the window has not passed. The 'window passed'/'not found' error is reported via the single error Exit / accounted for by the Read.",
+              "citation": "manuals-indexed/part-1-mm-principles-definitions-rules-v5-0-aug-2021/04-mapping-phase.md#L134-L149"
+            },
+            {
+              "name": "Mark booking cancelled",
+              "order": 3,
+              "movementType": "W",
+              "dataGroupRef": "Booking",
+              "note": "Write moves the updated (cancelled) booking data group to persistent storage.",
+              "citation": "manuals-indexed/part-1-mm-principles-definitions-rules-v5-0-aug-2021/04-mapping-phase.md#L134-L149"
+            },
+            {
+              "name": "Restore free-collection allowance",
+              "order": 4,
+              "movementType": "W",
+              "dataGroupRef": "Resident Allowance",
+              "note": "Write moves the restored allowance value for the year to persistent storage; the allowance is a distinct object of interest from the booking.",
+              "citation": "manuals-indexed/part-1-mm-principles-definitions-rules-v5-0-aug-2021/04-mapping-phase.md#L134-L149"
+            },
+            {
+              "name": "Send SMS confirmation",
+              "order": 5,
+              "movementType": "X",
+              "dataGroupRef": "SMS Confirmation",
+              "note": "Exit issuing the confirmation message to the SMS gateway (external software functional user); modeled one-way (no consumed response).",
+              "citation": "manuals-indexed/part-2-mm-guidelines-v5-0-sep-2024/03-the-mapping-phase.md#L273-L276"
+            },
+            {
+              "name": "Show agent confirmation/error",
+              "order": 6,
+              "movementType": "X",
+              "dataGroupRef": "Agent Notification",
+              "note": "One Exit accounts for all confirmation/error messages issued to the agent (cancellation confirmed, collection window already passed, booking not found).",
+              "citation": "manuals-indexed/part-2-mm-guidelines-v5-0-sep-2024/03-the-mapping-phase.md#L265-L279"
+            }
+          ],
+          "cfp": 6
+        }
+      ],
+      "gaps": [
+        {
+          "gapId": "CG-E12-01",
+          "category": "Measurement Gap",
+          "gapOrQuestion": "Caller identity verification ('after the caller's identity is verified') is a stated precondition but is assumed to be delivered by dependency E06 and is therefore NOT measured here. Is identity verification in-scope for E12?",
+          "impactOrNotes": "If in-scope, add a verify-identity functional process; if it round-trips to an external identity system it adds an Exit + Entry per primer item 1. CFP swing +2 to +4."
+        },
+        {
+          "gapId": "CG-E12-02",
+          "category": "Measurement Gap",
+          "gapOrQuestion": "Granularity: the lookup and the cancel are modeled as two functional processes (a query then an update) because the agent issues two distinct triggering commands. Some measurers would treat the whole agent interaction as one functional process.",
+          "impactOrNotes": "If combined into one FP, the separate triggering Entry and the lookup Read/Exit would partially fold together. CFP swing approx -2 (9 -> 7)."
+        },
+        {
+          "gapId": "CG-E12-03",
+          "category": "Measurement Gap",
+          "gapOrQuestion": "Restoring the free-collection allowance is modeled as a single Write. If the process must first retrieve the current allowance/usage value to compute the restored value, an additional Read is required.",
+          "impactOrNotes": "Add 1 Read to FP2. CFP swing +1 (9 -> 10)."
+        },
+        {
+          "gapId": "CG-E12-04",
+          "category": "Measurement Gap",
+          "gapOrQuestion": "The SMS to the caller is modeled as a one-way Exit to the SMS gateway. If the gateway returns a delivery/ack status that the functional process consumes, that is a return Entry (round-trip per primer item 1).",
+          "impactOrNotes": "Add 1 Entry to FP2. CFP swing +1 (9 -> 10)."
+        }
+      ],
+      "caveats": [
+        "Identity verification excluded as an E06 dependency (see CG-E12-01); if in-scope the count rises.",
+        "Modeled as two functional processes (lookup query + cancel update); a single-FP interpretation lowers the count (CG-E12-02).",
+        "'Booking not found' and 'collection window already passed' are treated as error conditions covered by the single agent-notification Exit / the validating Read, per primer rule 3 (part-2 §3.3.4 #L265-L279), so they add no extra movements.",
+        "SMS confirmation treated as one-way Exit and allowance restore as a single Write; both have +1 swings if a return/read is actually required (CG-E12-03, CG-E12-04)."
+      ]
+    }
+  ],
+  "measurementGaps": [
+    {
+      "gapId": "CG-E01-01",
+      "category": "Measurement Gap",
+      "gapOrQuestion": "Is the animal-registry match check a distinct functional process (agent explicitly requests a search, reviews matches, then creates the case), or is it performed automatically inside the case-creation process with a single triggering event?",
+      "impactOrNotes": "Modeled as two FPs (separate triggering Entries). If it is one combined FP, the second triggering Entry disappears: swing -1 CFP (epic 8 -> 7)."
+    },
+    {
+      "gapId": "CG-E01-02",
+      "category": "Measurement Gap",
+      "gapOrQuestion": "Are microchip/registered-animal records and found-pet records two distinct objects of interest, and are matches returned to the agent as one consolidated data group or two?",
+      "impactOrNotes": "Modeled as 2 Reads + 1 consolidated Exit. If it is a single registry object one Read is lost (-1); if matches are returned as two separate data groups one Exit is added (+1). Swing -1 to +1 CFP on FP1."
+    },
+    {
+      "gapId": "CG-E01-03",
+      "category": "Measurement Gap",
+      "gapOrQuestion": "Is routing to the Animal Management queue an attribute update on the same case record (folded into the case Write) or a data movement to a separate work-management system/object?",
+      "impactOrNotes": "Modeled as part of the case Write (no extra movement). If routing is a separate Write or an Exit to another system, swing +1 CFP on FP2."
+    },
+    {
+      "gapId": "CG-E01-04",
+      "category": "Measurement Gap",
+      "gapOrQuestion": "Does the case-creation process return an on-screen confirmation / case reference to the agent, or is the SMS to the caller the only acknowledgement?",
+      "impactOrNotes": "Included an agent-confirmation Exit as the natural response to the agent's triggering Entry. If no data is returned to the agent, swing -1 CFP on FP2."
+    },
+    {
+      "gapId": "CG-E02-01",
+      "category": "Measurement Gap",
+      "gapOrQuestion": "The description says the agent 'captures... photos if emailed in.' It is unclear whether emailed-in photos are received by this functional process as a distinct entered object of interest (a separate Entry for a Photo/Attachment data group) or are merely referenced/handled outside the measured software. No dedicated attachment-handling FUR is given.",
+      "impactOrNotes": "CFP swing +1: if photos constitute a distinct entered data group per Rule 13, add one Entry (7 CFP total). If they are just email attachments outside the measured boundary, no movement (6 CFP)."
+    },
+    {
+      "gapId": "CG-E02-02",
+      "category": "Measurement Gap",
+      "gapOrQuestion": "The 'not on council land' outcome is not described. If a distinct rejection/redirect message is sent to the resident, under the primer's confirmation/error rule all such messages from one FP collapse into a single Exit, but if the rejection carries additional distinct data (e.g., referral to the correct authority) it could be a separate data-carrying Exit.",
+      "impactOrNotes": "CFP swing 0 to +1: collapses into the existing resident Exit under part-2 §3.3.4 unless a genuinely additional data group is returned on rejection."
+    },
+    {
+      "gapId": "CG-E03-01",
+      "category": "Measurement Gap",
+      "gapOrQuestion": "The FUR does not explicitly state any error/confirmation message (e.g. 'no matching rate account found' when the property number/address does not resolve). If such a message is required, primer rule 3 collapses all error/confirmation messages into a single additional Exit.",
+      "impactOrNotes": "CFP swing +1 (one error/confirmation Exit) if the process must report an account-not-found or similar condition. Not counted to avoid inventing a movement not stated in the FUR."
+    },
+    {
+      "gapId": "CG-E03-02",
+      "category": "Measurement Gap",
+      "gapOrQuestion": "Boundary of the 'finance system': it is modeled here as a separate software functional user, giving an Exit (request) + Entry (response) round-trip (primer rule 1). If the finance data is instead persistent storage accessed directly by the measured software, the pair collapses to a single Read (Rule 18).",
+      "impactOrNotes": "CFP swing -1 (from 4 to 3) if finance retrieval is a Read of persistent storage rather than a round-trip to a separate application. The epic names a distinct 'finance system', so the round-trip interpretation was chosen."
+    },
+    {
+      "gapId": "CG-E03-03",
+      "category": "Measurement Gap",
+      "gapOrQuestion": "Identity verification ('After identity verification, the agent looks up...') is referenced but is owned by dependency epic E10 and is therefore excluded from this measurement.",
+      "impactOrNotes": "No CFP impact on E03. If identity verification were in scope for E03 it would add at least one further functional process; assumed measured under E10 to avoid double counting."
+    },
+    {
+      "gapId": "CG-E04-01",
+      "category": "Measurement Gap",
+      "gapOrQuestion": "The epic says the system 'calculates the schedule' but does not state whether schedule calculation requires reading additional persistent reference data (e.g. interest/penalty rate configuration or a rates calendar) beyond the rate account balance. If such config is read, an extra Read (+1 CFP) applies.",
+      "impactOrNotes": "CFP swing: +1 (one additional Read) if a rate/fee configuration data group is read to compute instalments. Not counted here to avoid inventing a movement; FP1 modelled at 6 CFP without it."
+    },
+    {
+      "gapId": "CG-E04-02",
+      "category": "Measurement Gap",
+      "gapOrQuestion": "Whether the arrears/eligibility state that qualifies the resident (dependency on E03) is verified within this FP via a Read of a separate object of interest, or whether the Rate Account read already covers it. Assumed covered by the Rate Account read.",
+      "impactOrNotes": "CFP swing: +1 (one additional Read) if a distinct eligibility/arrears-status object must be read separately from the Rate Account."
+    },
+    {
+      "gapId": "CG-E04-03",
+      "category": "Measurement Gap",
+      "gapOrQuestion": "Whether 'by post or email' represents two distinct functional users requiring two Exits, or a single dispatch channel (one Exit). Modelled as one Exit; per Rule 15 the same Exit type/data group counts once regardless of channel.",
+      "impactOrNotes": "CFP swing: 0 under Rule 15 (single data group). No swing expected; noted for transparency on channel modelling."
+    },
+    {
+      "gapId": "CG-E05-01",
+      "category": "Measurement Gap",
+      "gapOrQuestion": "Does 'assigns it to the Roads team' merely set an owner/assignment attribute on the works order (counted within the Create Write, as measured), or does it also send a distinct notification to the Roads team as a separate functional user? If the latter, that outbound notification is an additional Exit.",
+      "impactOrNotes": "CFP swing +1 (one additional Exit to the Roads team) if assignment triggers a separate notification data movement to a distinct functional user."
+    },
+    {
+      "gapId": "CG-E05-02",
+      "category": "Measurement Gap",
+      "gapOrQuestion": "The epic states the caller is linked to the case but does not specify how the caller is identified. If the process must look up / retrieve caller (contact) data from persistent storage before linking, that is an additional Read not currently counted.",
+      "impactOrNotes": "CFP swing +1 (one additional Read of a Caller/Contact data group) if caller identification requires a persistent-storage lookup within this process."
+    },
+    {
+      "gapId": "CG-E06-01",
+      "category": "Measurement Gap",
+      "gapOrQuestion": "Does booking a collection separately update/decrement the resident's free-collection allowance (a Write to 'Resident Collection Allowance'), or is remaining allowance derived on the fly by counting existing bookings (no separate Write)? The description states the allowance is checked but not whether it is written back.",
+      "impactOrNotes": "CFP swing +1 (9 CFP) if a separate Write to the allowance object is required; 8 CFP as measured if usage is derived rather than stored."
+    },
+    {
+      "gapId": "CG-E06-02",
+      "category": "Measurement Gap",
+      "gapOrQuestion": "Are the accepted item categories held in persistent storage (Read at order 3), or are they hardcoded/configuration constants that are not a persisted object of interest?",
+      "impactOrNotes": "CFP swing -1 (7 CFP) if categories are not persistent data (no Read); 8 CFP as measured assuming they are read from storage."
+    },
+    {
+      "gapId": "CG-E06-03",
+      "category": "Measurement Gap",
+      "gapOrQuestion": "Is the waste scheduling service an independent external software functional user (round-trip = Exit + Entry), or an in-scope component whose date lookup would instead be a Read of persistent schedule data (one Read)?",
+      "impactOrNotes": "CFP swing -1 (7 CFP) if it collapses to a single Read instead of an Exit+Entry pair; 8 CFP as measured treating it as an external functional user per primer rule 1."
+    },
+    {
+      "gapId": "CG-E07-01",
+      "category": "Measurement Gap",
+      "gapOrQuestion": "Routing to the Local Laws / Environmental Health team is modelled as internal owner/queue assignment persisted with the case (part of the Write). If routing instead fires an outbound notification/hand-off to a separate team system that is a functional user, that hand-off would be an additional Exit.",
+      "impactOrNotes": "CFP swing: +1 (5 -> 6) if the team is served by a distinct downstream software/system requiring an Exit rather than internal assignment."
+    },
+    {
+      "gapId": "CG-E07-02",
+      "category": "Measurement Gap",
+      "gapOrQuestion": "Complainant contact/anonymity is treated as a distinct object of interest (second Entry). If the FUR grain treats complainant attributes as part of the same complaint data group (single object of interest captured in one submission), only one triggering Entry exists.",
+      "impactOrNotes": "CFP swing: -1 (5 -> 4) if complainant details collapse into the Nuisance Complaint data group."
+    },
+    {
+      "gapId": "CG-E07-03",
+      "category": "Measurement Gap",
+      "gapOrQuestion": "The epic does not state whether the offending address or complaint category is validated against a persistent reference (property/address register, category list) during lodgement.",
+      "impactOrNotes": "CFP swing: +1 per distinct persistent data group Read (e.g. +1 for an address/property lookup) if such validation Reads exist."
+    },
+    {
+      "gapId": "CG-E08-01",
+      "category": "Measurement Gap",
+      "gapOrQuestion": "Is the property register the measured software's own persistent storage (modeled here as one Read) or a separate piece of software / external functional user? If external, the residency check becomes an Exit+Entry round-trip.",
+      "impactOrNotes": "CFP swing +1 (an Entry would be added if the property register is an external system rather than persistent storage). E08 depends_on E10/E11, which may host this register."
+    },
+    {
+      "gapId": "CG-E08-02",
+      "category": "Measurement Gap",
+      "gapOrQuestion": "Is the permit allowance a separately stored/read data group, or an attribute retrieved together with the issued-permit or permit-type data (thus not a distinct Read)?",
+      "impactOrNotes": "CFP swing -1 if the allowance is not a distinct data-group Read."
+    },
+    {
+      "gapId": "CG-E08-03",
+      "category": "Measurement Gap",
+      "gapOrQuestion": "Does fee calculation read persistent fee-rate data (a Read, as counted), or is the fee entered/passed with the application or fixed constant (no Read)?",
+      "impactOrNotes": "CFP swing -1 if no persistent fee-schedule Read occurs."
+    },
+    {
+      "gapId": "CG-E08-04",
+      "category": "Measurement Gap",
+      "gapOrQuestion": "How is payment handled? Are payment details captured as an additional Entry from the agent, and is a payment/transaction record persisted (a Write)? Modeled here only as a payment-system Exit+Entry round-trip.",
+      "impactOrNotes": "CFP swing +1 to +2 if a distinct payment-details Entry and/or a payment-record Write are in scope."
+    },
+    {
+      "gapId": "CG-E08-05",
+      "category": "Measurement Gap",
+      "gapOrQuestion": "Is 'Apply for a Parking Permit' a single functional process (assumed), or is payment a separately triggered functional process (agent/resident initiates payment as its own triggering event)?",
+      "impactOrNotes": "If split into two functional processes, the total structure and count change (a second FP would add its own triggering Entry and confirmation Exit, roughly +2 CFP)."
+    },
+    {
+      "gapId": "CG-E09-01",
+      "category": "Measurement Gap",
+      "gapOrQuestion": "Does this functional process itself Read the existing customer record from the customer master (to load/display it for editing or to confirm existence) before writing, or was that Read already performed by the E10 identity-verification/account-lookup process? The epic says 'the agent edits the record' but the record retrieval appears to belong to the E10 dependency.",
+      "impactOrNotes": "If a Read of the existing customer record occurs within this FP, add +1 CFP (Read of Contact Details). Base count assumes the record was already retrieved by E10 and no Read is needed here. Swing: +1 CFP (3 -> 4)."
+    },
+    {
+      "gapId": "CG-E09-02",
+      "category": "Measurement Gap",
+      "gapOrQuestion": "Does validation of the new postal address (or email/phone) invoke an external reference/lookup service (e.g. an address/postcode validation system)? The epic states 'the system validates the new details' without specifying whether validation is internal manipulation or a call to another piece of software.",
+      "impactOrNotes": "If an external validation service is called, that service is a functional user and the round-trip adds one Exit (request) + one Entry (response) = +2 CFP. If validation is purely internal data manipulation, it adds 0 CFP (manipulation is not a data movement). Swing: +2 CFP (3 -> 5)."
+    },
+    {
+      "gapId": "CG-E10-01",
+      "category": "Measurement Gap",
+      "gapOrQuestion": "The description says the agent asks the verification questions but does not state whether the system generates/presents the specific challenge questions (e.g. picks which attributes to ask) before the agent enters answers. If a separate 'request verification questions' functional process exists, it would add a triggering Entry, a Read of the customer master to determine askable attributes, and an Exit of the question set to the agent.",
+      "impactOrNotes": "CFP swing +0 to +3. If the system merely accepts free-form answers (assumed here), only the single 4 CFP process exists. If the system supplies the questions, add one functional process of ~3 CFP (E + R + X), making the epic 7 CFP."
+    },
+    {
+      "gapId": "CG-E10-02",
+      "category": "Measurement Gap",
+      "gapOrQuestion": "It is ambiguous whether 'logging the verification attempt against the customer record' is a separate object of interest (Verification Attempt Log, assumed here) or an update to the Customer Master Record itself. If it is the same object already Read, it is still a distinct Write and does not change the count; but if no logging is actually persisted, the Write disappears.",
+      "impactOrNotes": "CFP swing -1 (down to 3 CFP) only in the case that no verification attempt is persisted. Object-of-interest identity does not change the count as long as a Write occurs."
+    },
+    {
+      "gapId": "CG-E11-01",
+      "category": "Measurement Gap",
+      "gapOrQuestion": "The epic does not specify error/confirmation handling (invalid address, no council asset found, GIS service unavailable) nor whether lookup results are persisted (cached or audit-logged) to storage owned by this software.",
+      "impactOrNotes": "One error/confirmation Exit (order 5) is included as a defensible standard per primer rule 3 — ASSUMED. If no functional user status message is issued, remove 1 CFP (-> 4). If lookups are cached or audit-logged to persistent storage, add 1 Write per group (-> 6). CFP swing: 4-6."
+    },
+    {
+      "gapId": "CG-E12-01",
+      "category": "Measurement Gap",
+      "gapOrQuestion": "Caller identity verification ('after the caller's identity is verified') is a stated precondition but is assumed to be delivered by dependency E06 and is therefore NOT measured here. Is identity verification in-scope for E12?",
+      "impactOrNotes": "If in-scope, add a verify-identity functional process; if it round-trips to an external identity system it adds an Exit + Entry per primer item 1. CFP swing +2 to +4."
+    },
+    {
+      "gapId": "CG-E12-02",
+      "category": "Measurement Gap",
+      "gapOrQuestion": "Granularity: the lookup and the cancel are modeled as two functional processes (a query then an update) because the agent issues two distinct triggering commands. Some measurers would treat the whole agent interaction as one functional process.",
+      "impactOrNotes": "If combined into one FP, the separate triggering Entry and the lookup Read/Exit would partially fold together. CFP swing approx -2 (9 -> 7)."
+    },
+    {
+      "gapId": "CG-E12-03",
+      "category": "Measurement Gap",
+      "gapOrQuestion": "Restoring the free-collection allowance is modeled as a single Write. If the process must first retrieve the current allowance/usage value to compute the restored value, an additional Read is required.",
+      "impactOrNotes": "Add 1 Read to FP2. CFP swing +1 (9 -> 10)."
+    },
+    {
+      "gapId": "CG-E12-04",
+      "category": "Measurement Gap",
+      "gapOrQuestion": "The SMS to the caller is modeled as a one-way Exit to the SMS gateway. If the gateway returns a delivery/ack status that the functional process consumes, that is a return Entry (round-trip per primer item 1).",
+      "impactOrNotes": "Add 1 Entry to FP2. CFP swing +1 (9 -> 10)."
+    }
+  ]
+}
