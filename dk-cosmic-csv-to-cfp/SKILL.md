@@ -142,9 +142,11 @@ python3 "$SKILL_DIR/scripts/render_markdown.py" "$OUT_DIR/cosmic-count.json" "$O
 ```
 
 The report includes a top-level **Data groups** catalog (after the per-epic
-summary, before per-epic detail) listing every functional process's
-`dataGroups[]` by epic, FP, name, and description. Omitted when no process
-carries the field.
+summary, before per-epic detail). It is keyed by data group **name** — one row
+per distinct name, sorted alphabetically. Each row lists the using functional
+processes as comma-joined `Epic/FP` refs in one cell, and joins distinct
+descriptions with ` / ` when names collide. Omitted when no process carries the
+`dataGroups[]` field.
 
 Surface both output paths (`$OUT_DIR/cosmic-count.json` and
 `$OUT_DIR/cosmic-count.md`) to the user as inline-backtick absolute paths.

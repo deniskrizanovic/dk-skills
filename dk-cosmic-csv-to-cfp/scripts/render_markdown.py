@@ -89,21 +89,32 @@ def render(data) -> str:
     w("\n---\n")
 
     # ---- Data groups catalog ----------------------------------------------
-    # Flatten every functional process's dataGroups[] into one table keyed by
-    # epic + FP. Omitted cleanly when no process carries the field.
-    dg_rows = []
+    # Aggregate every functional process's dataGroups[] into a name-keyed,
+    # insertion-ordered map: one row per distinct data group name. Each name
+    # collects every using process as an `Epic/FP` ref and every distinct
+    # description. Omitted cleanly when no process carries the field.
+    dg_map = {}
     for e in epics:
         eid = e.get("epicId", "")
         for fp in e.get("functionalProcesses", []) or []:
             label = fp.get("functionalProcessId") or (fp.get("artifact", {}) or {}).get("name")
+            ref = f"{eid}/{label}"
             for dg in fp.get("dataGroups", []) or []:
-                dg_rows.append((eid, label, dg.get("name"), dg.get("description")))
-    if dg_rows:
+                name = dg.get("name")
+                entry = dg_map.setdefault(name, {"descriptions": [], "refs": []})
+                entry["refs"].append(ref)
+                desc = dg.get("description")
+                if desc not in entry["descriptions"]:
+                    entry["descriptions"].append(desc)
+    if dg_map:
         w("## Data groups\n")
-        w("| Epic | FP | Data group | Description |")
-        w("|---|---|---|---|")
-        for eid, label, name, desc in dg_rows:
-            w(f"| {esc(eid)} | {esc(label)} | {esc(name)} | {esc(desc)} |")
+        w("| Data group | Functional processes | Description |")
+        w("|---|---|---|")
+        for name in sorted(dg_map):
+            entry = dg_map[name]
+            refs = ", ".join(esc(r) for r in entry["refs"])
+            descs = " / ".join(esc(d) for d in entry["descriptions"])
+            w(f"| {esc(name)} | {refs} | {descs} |")
         w("\n---\n")
 
     # ---- Per-epic detail ---------------------------------------------------

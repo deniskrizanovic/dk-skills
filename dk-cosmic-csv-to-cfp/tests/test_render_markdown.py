@@ -141,17 +141,49 @@ def test_render_caveats_section():
 
 # ---- render: data groups catalog -----------------------------------------
 
+def _two_fp_report(dg_fp1, dg_fp2):
+    """Report with two functional processes across two epics, each carrying dataGroups[]."""
+    return minimal_report(epics=[
+        {
+            "epicId": "E01", "epicName": "Login", "epicCfp": 3, "confidence": "Assumed",
+            "functionalProcesses": [{
+                "functionalProcessId": "FP1-Login", "cfp": 3,
+                "dataGroups": dg_fp1,
+            }],
+            "gaps": [],
+        },
+        {
+            "epicId": "E02", "epicName": "Book", "epicCfp": 3, "confidence": "Assumed",
+            "functionalProcesses": [{
+                "functionalProcessId": "FP2-Book", "cfp": 3,
+                "dataGroups": dg_fp2,
+            }],
+            "gaps": [],
+        },
+    ])
+
+
 def test_render_data_groups_section_present():
-    ep = minimal_report()["epics"][0]
-    ep["functionalProcesses"][0]["dataGroups"] = [
-        {"name": "Lost Pet Report", "description": "Caller details, pet species."},
-        {"name": "Microchip Record", "description": "Registry match."},
-    ]
-    md = render(minimal_report(epics=[ep]))
+    # A name used by two FPs shows both Epic/FP refs comma-joined in one cell.
+    md = render(_two_fp_report(
+        [{"name": "Booking", "description": "Shared booking."},
+         {"name": "Microchip Record", "description": "Registry match."}],
+        [{"name": "Booking", "description": "Shared booking."}],
+    ))
     assert "## Data groups" in md
-    assert "| Epic | FP | Data group | Description |" in md
-    assert "| E01 | FP1-Login | Lost Pet Report | Caller details, pet species. |" in md
-    assert "| E01 | FP1-Login | Microchip Record | Registry match. |" in md
+    assert "| Data group | Functional processes | Description |" in md
+    # deduplicated to one row; both refs in a single cell; sorted alphabetically.
+    assert "| Booking | E01/FP1-Login, E02/FP2-Book | Shared booking. |" in md
+    assert "| Microchip Record | E01/FP1-Login | Registry match. |" in md
+
+
+def test_render_data_groups_conflicting_descriptions_joined():
+    # Same name, two FPs, different descriptions -> one row, joined with " / ".
+    md = render(_two_fp_report(
+        [{"name": "Booking", "description": "Entered by agent."}],
+        [{"name": "Booking", "description": "Stored record."}],
+    ))
+    assert "| Booking | E01/FP1-Login, E02/FP2-Book | Entered by agent. / Stored record. |" in md
 
 
 def test_render_omits_data_groups_when_absent():
