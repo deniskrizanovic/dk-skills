@@ -28,12 +28,26 @@
       "type": "array",
       "items": { "$ref": "#/definitions/dataMovement" }
     },
+    "dataGroups": {
+      "type": "array",
+      "description": "Schema v4 additive: distinct data groups (objects of interest / transient data groups) the functional process touches, deduplicated by name. Optional; authored by the measurer alongside dataMovements. Names align with dataMovements[].dataGroupRef by construction.",
+      "items": { "$ref": "#/definitions/dataGroup" }
+    },
     "traversalWarnings": {
       "type": "array",
       "items": { "type": "string" }
     }
   },
   "definitions": {
+    "dataGroup": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "description"],
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" }
+      }
+    },
     "movementType": {
       "type": "string",
       "enum": ["E", "R", "W", "X"]

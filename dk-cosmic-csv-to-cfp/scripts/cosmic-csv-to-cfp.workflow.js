@@ -56,6 +56,17 @@ const EPIC_SCHEMA = {
               },
             },
           },
+          dataGroups: {
+            type: 'array',
+            items: {
+              type: 'object',
+              required: ['name', 'description'],
+              properties: {
+                name: { type: 'string' },
+                description: { type: 'string' },
+              },
+            },
+          },
           cfp: { type: 'integer' },
         },
       },
@@ -142,6 +153,13 @@ OUTPUT SHAPE — each functional process is a standalone CosmicMeasureOutput:
     you applied a rule — note (rule justification) and citation
     (manuals-indexed/<slug>/<file>.md#L..). Since these are proposal-grain
     (no source code), OMIT implementationType and isApiCall entirely.
+- dataGroups[]: one entry per DISTINCT data group / object of interest the
+    process touches (deduplicated — an object entered then written is ONE data
+    group, not two). Each entry: name (the data-group identifier) and
+    description (a short AUTHORED gloss of what the object carries — new
+    information, not a copy of a movement label). Use the SAME name string in
+    dataGroups[].name and in the dataMovements[].dataGroupRef values that refer
+    to it, so the two align by construction.
 - cfp: the process CFP = count of dataMovements (1 movement = 1 CFP).
 
 epicId: echo "${epic.epic_id}" verbatim. epicName: echo the epic's name

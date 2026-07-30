@@ -120,8 +120,11 @@ directory:
   `epics[].functionalProcesses[]` item is a standalone `CosmicMeasureOutput`:
   `functionalProcessId`, `artifact` `{type, name}`, optional `cfp`, and
   `dataMovements[]` (each `name`, `order`, `movementType` E/X/R/W,
-  `dataGroupRef`, and optional rule `note`/`citation`). The parent `$ref`s the
-  child so every FP block validates on its own.
+  `dataGroupRef`, and optional rule `note`/`citation`), and an optional
+  `dataGroups[]` — one `{name, description}` per DISTINCT data group / object of
+  interest the process touches (deduplicated by name; `name` aligns with the
+  `dataMovements[].dataGroupRef` values, `description` is an authored gloss). The
+  parent `$ref`s the child so every FP block validates on its own.
 
 > **Breaking change.** The output migrated from ad-hoc snake_case to camelCase
 > aligned with the child schema: `roll_up`→`rollUp`, `epic_cfp`→`epicCfp`,
@@ -137,6 +140,11 @@ directory:
 ```bash
 python3 "$SKILL_DIR/scripts/render_markdown.py" "$OUT_DIR/cosmic-count.json" "$OUT_DIR/cosmic-count.md"
 ```
+
+The report includes a top-level **Data groups** catalog (after the per-epic
+summary, before per-epic detail) listing every functional process's
+`dataGroups[]` by epic, FP, name, and description. Omitted when no process
+carries the field.
 
 Surface both output paths (`$OUT_DIR/cosmic-count.json` and
 `$OUT_DIR/cosmic-count.md`) to the user as inline-backtick absolute paths.

@@ -88,6 +88,24 @@ def render(data) -> str:
     w(f"| | **Total** | **{total}** | | | {gap_total} |")
     w("\n---\n")
 
+    # ---- Data groups catalog ----------------------------------------------
+    # Flatten every functional process's dataGroups[] into one table keyed by
+    # epic + FP. Omitted cleanly when no process carries the field.
+    dg_rows = []
+    for e in epics:
+        eid = e.get("epicId", "")
+        for fp in e.get("functionalProcesses", []) or []:
+            label = fp.get("functionalProcessId") or (fp.get("artifact", {}) or {}).get("name")
+            for dg in fp.get("dataGroups", []) or []:
+                dg_rows.append((eid, label, dg.get("name"), dg.get("description")))
+    if dg_rows:
+        w("## Data groups\n")
+        w("| Epic | FP | Data group | Description |")
+        w("|---|---|---|---|")
+        for eid, label, name, desc in dg_rows:
+            w(f"| {esc(eid)} | {esc(label)} | {esc(name)} | {esc(desc)} |")
+        w("\n---\n")
+
     # ---- Per-epic detail ---------------------------------------------------
     for e in epics:
         eid = e.get("epicId", "")

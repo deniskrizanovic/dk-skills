@@ -139,6 +139,26 @@ def test_render_caveats_section():
     assert "- assumed one role" in md
 
 
+# ---- render: data groups catalog -----------------------------------------
+
+def test_render_data_groups_section_present():
+    ep = minimal_report()["epics"][0]
+    ep["functionalProcesses"][0]["dataGroups"] = [
+        {"name": "Lost Pet Report", "description": "Caller details, pet species."},
+        {"name": "Microchip Record", "description": "Registry match."},
+    ]
+    md = render(minimal_report(epics=[ep]))
+    assert "## Data groups" in md
+    assert "| Epic | FP | Data group | Description |" in md
+    assert "| E01 | FP1-Login | Lost Pet Report | Caller details, pet species. |" in md
+    assert "| E01 | FP1-Login | Microchip Record | Registry match. |" in md
+
+
+def test_render_omits_data_groups_when_absent():
+    md = render(minimal_report())
+    assert "## Data groups" not in md
+
+
 # ---- render: cfpRange robustness (bug #6) --------------------------------
 
 def test_render_tolerates_short_cfp_range():
