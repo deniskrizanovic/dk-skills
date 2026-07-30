@@ -16,7 +16,7 @@ metadata:
 # COSMIC CFP Count (from an epics CSV)
 
 Turn a CSV of epics into a full COSMIC functional-size measurement: a
-`cosmic-count.json` (canonical) plus a human-readable markdown report, with
+`<stem>-cosmic-count.json` (canonical) plus a human-readable markdown report, with
 every data movement enumerated, cited to the official COSMIC v5.0 manuals, and
 gaps surfaced instead of guessed.
 
@@ -66,12 +66,21 @@ the input CSV:
 OUT_DIR=$(dirname "<path/to/epics.csv>")
 ```
 
-If the user named an output directory, use that instead (`mkdir -p` it). Both
-artifacts write **directly** into `OUT_DIR` — `cosmic-count.json` and
-`cosmic-count.md`, side by side. **Never** write inside the skill directory
-(`$SKILL_DIR`) and **never** recreate the old `data/` or `outputs/artifacts/`
-subdirectories. If `OUT_DIR` is not writable, surface the error and ask the user
-for an alternate directory.
+If the user named an output directory, use that instead (`mkdir -p` it).
+
+**Derive `STEM` — the output filename base.** Take the input CSV basename with
+its `.csv` extension removed:
+
+```bash
+STEM=$(basename "<path/to/epics.csv>" .csv)
+```
+
+Both artifacts write **directly** into `OUT_DIR`, named from the stem —
+`$STEM-cosmic-count.json` and `$STEM-cosmic-count.md`, side by side (e.g.
+`council-call-centre-epics.csv` → `council-call-centre-epics-cosmic-count.json` /
+`.md`). **Never** write inside the skill directory (`$SKILL_DIR`) and **never**
+recreate the old `data/` or `outputs/artifacts/` subdirectories. If `OUT_DIR` is
+not writable, surface the error and ask the user for an alternate directory.
 
 ### Step 2 — read the coach primer, then run the measurement workflow
 
@@ -115,13 +124,13 @@ before any measure agent if `args.primer` is absent or empty. It then:
    object costs tokens twice and can silently alter a value).
 
 After the workflow returns, write `result.cosmicCount` **verbatim** to
-`$OUT_DIR/cosmic-count.json` (pretty-printed, 2-space indent) with the Write tool.
+`$OUT_DIR/$STEM-cosmic-count.json` (pretty-printed, 2-space indent) with the Write tool.
 If `result.epicsFailed` is non-empty, surface those epic IDs to the user — they
 were excluded from the roll-up and the count is partial.
 
 ### Output format — two schemas (camelCase)
 
-`$OUT_DIR/cosmic-count.json` is governed by two JSON Schemas that ship in the skill
+`$OUT_DIR/$STEM-cosmic-count.json` is governed by two JSON Schemas that ship in the skill
 directory:
 
 - **`cosmic_count_report.schema.json`** (`CosmicCountReport`) — the report
@@ -153,7 +162,7 @@ directory:
 ### Step 3 — render the markdown report
 
 ```bash
-python3 "$SKILL_DIR/scripts/render_markdown.py" "$OUT_DIR/cosmic-count.json" "$OUT_DIR/cosmic-count.md"
+python3 "$SKILL_DIR/scripts/render_markdown.py" "$OUT_DIR/$STEM-cosmic-count.json" "$OUT_DIR/$STEM-cosmic-count.md"
 ```
 
 The report includes a top-level **Data groups** catalog (after the per-epic
@@ -163,8 +172,8 @@ processes as comma-joined `Epic/FP` refs in one cell, and joins distinct
 descriptions with ` / ` when names collide. Omitted when no process carries the
 `dataGroups[]` field.
 
-Surface both output paths (`$OUT_DIR/cosmic-count.json` and
-`$OUT_DIR/cosmic-count.md`) to the user as inline-backtick absolute paths.
+Surface both output paths (`$OUT_DIR/$STEM-cosmic-count.json` and
+`$OUT_DIR/$STEM-cosmic-count.md`) to the user as inline-backtick absolute paths.
 
 ## Guardrails
 

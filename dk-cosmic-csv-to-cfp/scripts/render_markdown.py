@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Render data/cosmic-count.json into a human-readable COSMIC CFP markdown report.
+"""Render a COSMIC CFP count JSON into a human-readable markdown report.
 
 Usage:
-    python3 render_markdown.py <cosmic-count.json> [output.md]
+    python3 render_markdown.py <count.json> [output.md]
 
 If output.md is omitted, prints to stdout. Layout mirrors the reference report:
 disclaimer -> roll-up + per-epic summary table -> per-epic sections
@@ -172,7 +172,7 @@ def render(data) -> str:
 
 def main():
     if len(sys.argv) not in (2, 3):
-        sys.exit("usage: render_markdown.py <cosmic-count.json> [output.md]")
+        sys.exit("usage: render_markdown.py <count.json> [output.md]")
 
     with open(sys.argv[1], encoding="utf-8") as f:
         data = json.load(f)

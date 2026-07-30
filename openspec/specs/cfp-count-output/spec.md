@@ -17,13 +17,13 @@ functional-process block validates as a standalone `CosmicMeasureOutput`.
 
 #### Scenario: Functional-process block validates as child schema
 
-- **WHEN** the skill emits `cosmic-count.json` in the resolved output directory
+- **WHEN** the skill emits `<stem>-cosmic-count.json` in the resolved output directory
 - **THEN** each entry under any `epics[].functionalProcesses[]` array validates
   against `cosmic_measure_output.schema.json` on its own
 
 #### Scenario: Whole report validates as parent schema
 
-- **WHEN** the skill emits `cosmic-count.json` in the resolved output directory
+- **WHEN** the skill emits `<stem>-cosmic-count.json` in the resolved output directory
 - **THEN** the entire file validates against `cosmic_count_report.schema.json`
 
 ### Requirement: Child schema optional code-analysis fields
@@ -52,7 +52,7 @@ prior snake_case output.
 
 #### Scenario: Report uses camelCase keys
 
-- **WHEN** the skill emits `cosmic-count.json` in the resolved output directory
+- **WHEN** the skill emits `<stem>-cosmic-count.json` in the resolved output directory
 - **THEN** roll-up appears under `rollUp`, per-epic size under `epicCfp`,
   movement type under `movementType`, and data group under `dataGroupRef`
 - **AND** no snake_case keys (e.g. `epic_cfp`, `roll_up`, `data_group`) appear
@@ -106,7 +106,7 @@ output which omits it still validates.
 
 #### Scenario: Functional process carries its data groups
 
-- **WHEN** the skill emits `data/cosmic-count.json`
+- **WHEN** the skill emits `<stem>-cosmic-count.json`
 - **THEN** a functional process MAY include a `dataGroups[]` array
 - **AND** each entry has a `name` and a `description`
 - **AND** the block still validates against `cosmic_measure_output.schema.json`

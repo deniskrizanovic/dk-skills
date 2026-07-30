@@ -26,7 +26,7 @@ Measures the COSMIC functional size (CFP) of a delivery scope from a CSV of epic
 - Parses an epics CSV (`Epic ID`, `Epic Name`, `Description`, optional `Confidence`/`Depends On`) into workflow args
 - Derives the recurring COSMIC v5.0 rules **once** (primer), then measures each epic in parallel (one agent per epic), decomposing every functional process into E/X/R/W movements with manual citations
 - Surfaces vague requirements as measurement gaps with CFP swings — never invents a number
-- Computes the roll-up in code and writes canonical `cosmic-count.json` (defaulting next to the input CSV), then renders a markdown report alongside it
+- Computes the roll-up in code and writes canonical `<stem>-cosmic-count.json` (named from the input CSV's stem, defaulting next to the input CSV), then renders a markdown report alongside it
 
 **Depends on:** `dk-cosmic-counting-coach` (the rule authority).
 

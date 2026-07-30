@@ -1,33 +1,4 @@
-# Capability: cfp-count-output-location
-
-## Purpose
-
-Define where the COSMIC Function Point counting skill writes its output artifacts (JSON and markdown reports), ensuring outputs are written to a predictable, user-controllable location rather than scattered across subdirectories or the skill's installation directory.
-
-## Requirements
-
-### Requirement: Output directory defaults to CSV parent
-
-The skill SHALL write its output artifacts to a resolved output directory that
-defaults to the parent directory of the input epics CSV. The skill MUST NOT
-write artifacts inside its own installed skill directory.
-
-#### Scenario: Default resolves to CSV parent
-
-- **WHEN** the user runs the skill on `/some/path/epics.csv` and gives no output directory
-- **THEN** the artifacts are written under `/some/path/`
-- **AND** no artifact is written inside the skill directory
-
-### Requirement: User can override the output directory
-
-The skill SHALL let the user specify an output directory that overrides the
-default. When the user provides one, the artifacts MUST be written there.
-
-#### Scenario: Explicit output directory honored
-
-- **WHEN** the user supplies an output directory `/out/dir`
-- **THEN** both output artifacts are written under `/out/dir`
-- **AND** the CSV-parent default is not used
+## MODIFIED Requirements
 
 ### Requirement: Flattened single output directory
 
