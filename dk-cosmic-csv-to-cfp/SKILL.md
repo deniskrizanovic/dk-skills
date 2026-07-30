@@ -2,9 +2,10 @@
 name: dk-cosmic-csv-to-cfp
 description: >
   Measures the COSMIC functional size (CFP) of a delivery scope from a CSV of
-  epics. Runs a multi-agent workflow: derives the COSMIC v5.0 rules once, measures
-  every epic in parallel (one agent per epic, grounded in the cosmic-coach's
-  indexed manuals), computes the roll-up, and renders a markdown report. Use when
+  epics. Runs a multi-agent workflow: reads the cosmic-coach's shipped COSMIC
+  v5.0 rules primer, measures every epic in parallel (one agent per epic, grounded
+  in the coach's indexed manuals), computes the roll-up, and renders a markdown
+  report. Use when
   someone hands you an epics CSV and wants a COSMIC/CFP count, functional-size
   measurement, or a movement-level sizing of a Salesforce scope.
 metadata:
@@ -28,8 +29,9 @@ gaps surfaced instead of guessed.
 ## Dependency
 
 Requires the **`dk-cosmic-counting-coach`** skill (invoked as `cosmic-coach`) —
-its indexed COSMIC v5.0 manuals are the sole rule authority. It must be installed
-(symlinked in `~/.claude/skills/`) or the Prime stage cannot ground the rules.
+its indexed COSMIC v5.0 manuals are the sole rule authority, and its shipped
+`rules-primer.md` grounds the recurring rules. It must be installed (symlinked in
+`~/.claude/skills/`); the workflow **hard-fails** without the coach's primer.
 
 ## Input
 
@@ -71,30 +73,43 @@ artifacts write **directly** into `OUT_DIR` — `cosmic-count.json` and
 subdirectories. If `OUT_DIR` is not writable, surface the error and ask the user
 for an alternate directory.
 
-### Step 2 — run the measurement workflow
+### Step 2 — read the coach primer, then run the measurement workflow
 
-Invoke the Workflow tool with the script and the parsed args:
+**Read the coach's rules primer on the main thread.** Workflow scripts have no
+filesystem access, so the main thread reads the file and passes its contents in.
+Resolve the coach skill directory and read its primer:
+
+```bash
+COACH_DIR=$(realpath ~/.claude/skills/dk-cosmic-counting-coach)
+cat "$COACH_DIR/rules-primer.md"
+```
+
+Capture the full file contents as the `primer` string. If the file is missing,
+the coach is not installed or its primer was never generated — stop and install
+the coach / regenerate its primer (see the coach's *Regenerate the rules primer*
+step). Do **not** invent a primer.
+
+Invoke the Workflow tool with the script and the parsed args **plus the primer**:
 
 ```
 Workflow({
   scriptPath: "<SKILL_DIR>/scripts/cosmic-csv-to-cfp.workflow.js",
-  args: <the parsed {epics:[...]} object>
+  args: { epics: [...], primer: "<full contents of the coach's rules-primer.md>" }
 })
 ```
 
-(Pass `args` as the actual JSON value, not a string.) The workflow:
+(Pass `args` as the actual JSON value, not a string.) The workflow **hard-fails**
+before any measure agent if `args.primer` is absent or empty. It then:
 
-1. **Prime** — one agent asks the coach for the recurring COSMIC rules
-   (external round-trip, CRUD movements, single confirmation/error Exit,
-   functional-process boundaries, single-triggering-Entry) with verbatim
-   citations, and returns a compact primer. Derived **once**, injected into
-   every measure agent — the main token saver.
-2. **Measure** — one agent per epic (medium effort, auto-throttled fan-out)
-   decomposes each functional process into E/X/R/W
-   movements, applying the primer and grepping the manuals only for
-   adjudications the primer doesn't cover. Vague requirements become
-   `CG-<epic>-NN` measurement gaps, never invented numbers.
-3. **Synthesize** — JS computes the roll-up (Confirmed floor → measured total,
+1. **Measure** — one agent per epic (medium effort, auto-throttled fan-out)
+   decomposes each functional process into E/X/R/W movements, applying the
+   supplied primer (the coach's shipped, version-stamped rules) and grepping the
+   manuals only for adjudications the primer doesn't cover. Vague requirements
+   become `CG-<epic>-NN` measurement gaps, never invented numbers. Injecting the
+   primer once into every agent — instead of re-deriving it per run — is the main
+   token saver and makes `rulesPrimer` provenance deterministic (see the coach's
+   ADR 0002).
+2. **Synthesize** — JS computes the roll-up (Confirmed floor → measured total,
    gap count) and assembles the full report object. The workflow returns it as
    `result.cosmicCount` — no agent re-serializes it (an LLM echoing the whole
    object costs tokens twice and can silently alter a value).

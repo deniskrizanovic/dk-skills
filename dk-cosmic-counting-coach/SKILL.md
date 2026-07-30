@@ -59,6 +59,37 @@ maps every leaf section to file + line range. Re-running the indexer is
 idempotent — a PDF whose mtime predates the existing index is skipped. To
 force a rebuild, delete the manual's subfolder under `manuals-indexed/`.
 
+### Regenerate the rules primer (after re-indexing)
+
+The coach ships `rules-primer.md` — a distilled, version-stamped, scope-neutral
+summary of the recurring COSMIC v5.0 movement rules (see `docs/adr/0002`). It is
+a **pre-computed answer set** for the handful of rules every scope re-derives, so
+consumers (e.g. `dk-cosmic-csv-to-cfp`) read the file instead of asking the coach
+live. Its citations point into `manuals-indexed/`, so its line numbers **rot when
+you re-index**. Whenever you re-run the indexer above, regenerate the primer:
+
+**Mechanism (chosen): documented one-shot agent invocation, not a script.** The
+derivation is an LLM task (translate → grep → cite → verify), the same work the
+Q&A oracle does; a `scripts/` helper would have to embed an agent anyway and the
+corpus changes rarely. So this stays a deliberate, human-invoked prompt. Dispatch
+a general-purpose agent with this instruction (it is the source-of-truth primer
+prompt — no second copy lives in any consumer):
+
+> Derive a COMPACT (<~500 words), scope-neutral COSMIC v5.0 rules primer from
+> `$SKILL_DIR/manuals-indexed/`. Cover: (1) external-system round-trip (request →
+> response) — how many movements and which types; (2) CRUD on a persistent object
+> of interest — which E/R/W/X for create/read/update/delete; (3) confirmation and
+> error messages — how counted; (4) what makes two functional processes DISTINCT
+> vs one (triggering event, functional user); (5) the single-triggering-Entry rule
+> and how all responses to it stay in one process. For EACH, state the rule in one
+> or two sentences PLUS the exact citation `manuals-indexed/<slug>/<file>.md#L..`.
+> Domain-neutral — pure COSMIC, no worked examples, no Salesforce flavor. Before
+> returning, re-open every citation and confirm the line range contains the rule.
+
+Then: review the output, overwrite `rules-primer.md`, and **update its
+frontmatter** — set `derivedFrom.indexDate` to the current index date and
+`regeneratedOn` to today. Keep the file domain-neutral and citation-complete.
+
 ### Mode selection
 
 Pick a mode from the user's phrasing:
@@ -182,3 +213,14 @@ Citations and Caveats blocks remain as above.
   markdown is sufficient at manual scale. See docs/adr/0001.
 - No web fallback when manuals are silent — refuse instead.
 - No mutation of measurer outputs.
+
+## Shipped artifacts & docs
+
+- **`rules-primer.md`** — distilled, version-stamped, scope-neutral summary of the
+  recurring COSMIC v5.0 movement rules, cited into `manuals-indexed/`. Consumed by
+  measurers (e.g. `dk-cosmic-csv-to-cfp`) so they don't re-derive the common rules
+  live. Regenerate it whenever you re-index (see *Regenerate the rules primer*).
+- **`docs/adr/0001-llm-translation-over-vector-db.md`** — why grep + LLM
+  translation instead of a vector DB.
+- **`docs/adr/0002-distilled-primer-over-live-rederivation.md`** — why the primer
+  is a shipped pre-computed artifact instead of a live per-run derivation.

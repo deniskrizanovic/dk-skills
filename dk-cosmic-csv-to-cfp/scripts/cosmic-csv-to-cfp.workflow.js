@@ -2,17 +2,33 @@ export const meta = {
   name: 'cosmic-csv-to-cfp',
   description: 'Full COSMIC (CFP) measurement of a scope from an epics list: shared rules primer, one agent per epic, coach-grounded, standalone JSON output',
   phases: [
-    { title: 'Prime' },      // derive the common COSMIC rules ONCE (token saver)
     { title: 'Measure' },    // epics — auto-throttled fan-out, medium effort
     { title: 'Synthesize' }, // serialize the JS-computed roll-up (near-free)
   ],
 }
 
 // ---- inputs ---------------------------------------------------------------
-// args = { epics:[...] }  — each epic: {epic_id, epic_name, description, ...}
-// Produce it from an epics CSV with scripts/epics_csv_to_args.py.
+// args = { epics:[...], primer:"<coach rules-primer.md contents>" }
+//   epics — each: {epic_id, epic_name, description, ...}; produce with
+//           scripts/epics_csv_to_args.py.
+//   primer — the coach's shipped rules-primer.md, read on the MAIN THREAD and
+//           passed in (workflow scripts have no filesystem access). See SKILL.md
+//           Step 2. The primer used to be derived by a live Prime agent every
+//           run; it is now a version-stamped coach artifact for deterministic,
+//           reviewed, round-trip-free grounding.
 const epics = args?.epics ?? []
 if (!epics.length) throw new Error('Pass {epics:[...]} as args (see epics_csv_to_args.py)')
+
+// Hard-fail on a missing primer — no live re-derivation fallback. A missing
+// primer means under-grounded epics, worse than stopping (see ADR 0002).
+const primer = args?.primer
+if (!primer || !String(primer).trim()) {
+  throw new Error(
+    'Missing args.primer. Read the coach\'s rules-primer.md ' +
+    '(dk-cosmic-counting-coach/rules-primer.md) on the main thread and pass its ' +
+    'contents as args.primer. The workflow does NOT derive the primer live.'
+  )
+}
 
 // ---- structured schema ----------------------------------------------------
 // camelCase throughout, matching the two ship schemas. Each functionalProcesses[]
@@ -90,34 +106,14 @@ const EPIC_SCHEMA = {
   },
 }
 
-// ---- LEVER 1: derive the common rules ONCE (not N×) -----------------------
-// The single biggest token saver. One agent asks the cosmic-coach for the
-// handful of rules EVERY epic re-derives (SSO round-trip, CRUD movements, the
-// single confirmation/error Exit, functional-process boundaries), captures the
-// verbatim citations, and returns a compact primer. Injected into all measure
-// agents so they only grep the manuals for the UNUSUAL adjudication their epic
-// actually needs.
-phase('Prime')
-const primer = await agent(`
-Invoke the \`cosmic-coach\` skill (Q&A mode) and, using its indexed COSMIC v5.0
-manuals under manuals-indexed/, produce a COMPACT reusable rules primer covering
-the movement patterns that recur across a Salesforce delivery scope. Cover:
-
-1. External-system round-trip (a functional process sends a request to another
-   piece of software and receives a response — e.g. federated SSO to an IdP,
-   an API call to an external service): how many movements, and which types?
-2. CRUD on a persistent object of interest: which movements (Entry/Read/Write/
-   Exit) for create, read, update, delete from a user-triggered process?
-3. Confirmation and error messages back to the user: how are they counted?
-4. What makes two functional processes DISTINCT vs one (triggering event,
-   functional user)?
-5. The single triggering Entry rule and how all responses to it belong to the
-   same functional process.
-
-For EACH, give the rule in one or two sentences PLUS the exact citation
-(manuals-indexed/<slug>/<file>.md#L..). Keep the whole primer under ~500 words.
-This is a shared reference, so be precise and terse — no worked examples.
-`, { label: 'rules-primer', phase: 'Prime', effort: 'medium' })
+// ---- LEVER 1: the common rules primer is supplied, not re-derived ---------
+// The single biggest token saver. The handful of rules EVERY epic re-derives
+// (external round-trip, CRUD movements, the single confirmation/error Exit,
+// functional-process boundaries, single-triggering-Entry) live in the coach's
+// version-stamped rules-primer.md, passed in as args.primer (validated above).
+// Injected into all measure agents so they only grep the manuals for the
+// UNUSUAL adjudication their epic actually needs. No live Prime agent — the
+// primer is a reviewed, deterministic artifact (see ADR 0002).
 
 // ---- LEVER 2: medium effort, primed — measure one epic per agent ----------
 const measurePrompt = (epic, i) => `
