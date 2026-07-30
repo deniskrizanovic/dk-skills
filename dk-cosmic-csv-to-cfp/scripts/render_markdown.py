@@ -102,15 +102,16 @@ def render(data) -> str:
             for dg in fp.get("dataGroups", []) or []:
                 name = dg.get("name")
                 entry = dg_map.setdefault(name, {"descriptions": [], "refs": []})
-                entry["refs"].append(ref)
+                if ref not in entry["refs"]:
+                    entry["refs"].append(ref)
                 desc = dg.get("description")
-                if desc not in entry["descriptions"]:
+                if desc and desc not in entry["descriptions"]:
                     entry["descriptions"].append(desc)
     if dg_map:
         w("## Data groups\n")
         w("| Data group | Functional processes | Description |")
         w("|---|---|---|")
-        for name in sorted(dg_map):
+        for name in sorted(dg_map, key=lambda n: str(n or "")):
             entry = dg_map[name]
             refs = ", ".join(esc(r) for r in entry["refs"])
             descs = " / ".join(esc(d) for d in entry["descriptions"])

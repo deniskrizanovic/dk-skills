@@ -191,6 +191,35 @@ def test_render_omits_data_groups_when_absent():
     assert "## Data groups" not in md
 
 
+def test_render_data_groups_tolerates_null_name():
+    # A dataGroup missing `name` -> None key must not crash sorted().
+    md = render(_two_fp_report(
+        [{"description": "Nameless group."}],
+        [{"name": "Booking", "description": "Named group."}],
+    ))
+    assert "## Data groups" in md
+    assert "| Booking | E02/FP2-Book | Named group. |" in md
+
+
+def test_render_data_groups_dedupes_repeated_ref():
+    # One FP listing the same name twice -> the Epic/FP ref appears once.
+    md = render(_two_fp_report(
+        [{"name": "Booking", "description": "Read."},
+         {"name": "Booking", "description": "Write."}],
+        [],
+    ))
+    assert "| Booking | E01/FP1-Login | Read. / Write. |" in md
+
+
+def test_render_data_groups_skips_null_description():
+    # A null description must not leave a dangling ` / ` fragment.
+    md = render(_two_fp_report(
+        [{"name": "Booking", "description": "Entered by agent."}],
+        [{"name": "Booking"}],
+    ))
+    assert "| Booking | E01/FP1-Login, E02/FP2-Book | Entered by agent. |" in md
+
+
 # ---- render: cfpRange robustness (bug #6) --------------------------------
 
 def test_render_tolerates_short_cfp_range():
