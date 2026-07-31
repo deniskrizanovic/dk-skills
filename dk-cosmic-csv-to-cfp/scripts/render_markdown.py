@@ -15,8 +15,15 @@ import sys
 
 
 def esc(text) -> str:
-    """Escape pipes and collapse newlines so a cell stays on one table row."""
-    return str(text or "").replace("|", "\\|").replace("\n", " ").strip()
+    """Escape pipes and collapse newlines (incl. CRLF) so a cell stays on one row."""
+    return (
+        str(text or "")
+        .replace("|", "\\|")
+        .replace("\r\n", " ")
+        .replace("\r", " ")
+        .replace("\n", " ")
+        .strip()
+    )
 
 
 def fp_cfp(fp) -> int:
@@ -123,6 +130,12 @@ def render(data) -> str:
         eid = e.get("epicId", "")
         w(f"## {esc(e.get('epicId'))} — {esc(e.get('epicName'))}\n")
         w(f"**Epic CFP: {e.get('epicCfp', 0)} · Confidence: {esc(e.get('confidence'))}**\n")
+
+        # esc() collapses \r and \n and escapes pipes so the source requirement
+        # stays inside one clean quote block and can't inject table/heading syntax
+        description = esc(e.get("description"))
+        if description:
+            w("> " + description + "\n")
 
         users = e.get("functionalUsers", []) or []
         if users:

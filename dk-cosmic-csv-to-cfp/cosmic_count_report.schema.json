@@ -64,6 +64,10 @@
       "properties": {
         "epicId": { "type": "string" },
         "epicName": { "type": "string" },
+        "description": {
+          "type": "string",
+          "description": "Source requirement text from the input CSV that the measurement rests on. Optional; spliced in verbatim by the workflow from the input epic, not produced by the measure agent."
+        },
         "functionalUsers": {
           "type": "array",
           "items": { "type": "string" }

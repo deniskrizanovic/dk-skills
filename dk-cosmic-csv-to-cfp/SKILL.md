@@ -154,8 +154,10 @@ directory:
   envelope for the whole scope: `disclaimer`, `rulesPrimer`, `rollUp`
   (`projectCfpCountable`, `cfpRange` `[confirmedFloor, measuredTotal]`,
   `epicsMeasured`, `epicsTotal`, `countableEpics`, `epicsRestingOnAssumptions`),
-  `epics[]` (`epicId`, `epicName`, `confidence`, `epicCfp`, `caveats`,
-  `functionalProcesses`, `gaps`), and `measurementGaps[]`.
+  `epics[]` (`epicId`, `epicName`, optional `description` — the source
+  requirement text spliced in verbatim from the input CSV by the workflow,
+  `confidence`, `epicCfp`,
+  `caveats`, `functionalProcesses`, `gaps`), and `measurementGaps[]`.
 - **`cosmic_measure_output.schema.json`** (`CosmicMeasureOutput`) — the child
   unit, reused **verbatim** from the code-analysis COSMIC measurer. Each
   `epics[].functionalProcesses[]` item is a standalone `CosmicMeasureOutput`:

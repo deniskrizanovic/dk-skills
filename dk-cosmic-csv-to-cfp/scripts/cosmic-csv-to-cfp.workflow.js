@@ -210,7 +210,13 @@ const results = await pipeline(
     })
 )
 
-const measured = results.filter(Boolean)
+// Splice the source requirement in from the ORIGINAL epic (pipeline preserves
+// order, so results[i] pairs with epics[i]). description is data the main thread
+// already holds — copying it in JS avoids the LEVER-3 anti-pattern of round-
+// tripping it through the agent (double token cost, risk of silent alteration).
+const measured = results
+  .map((e, i) => (e ? { ...e, description: epics[i].description || undefined } : e))
+  .filter(Boolean)
 // pipeline preserves order, so a null result maps back to epics[i] — record the
 // epics whose measure agent died so the roll-up can't pass off a partial run as
 // full coverage (silent truncation would read as "everything measured").
