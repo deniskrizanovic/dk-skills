@@ -8,7 +8,7 @@ export const meta = {
 }
 
 // ---- inputs ---------------------------------------------------------------
-// args = { epics:[...], primer:"<coach rules-primer.md contents>" }
+// args = { epics:[...], primer:"<coach rules-primer.md contents>", manualsPath:"<abs path>" }
 //   epics — each: {epic_id, epic_name, description, ...}; produce with
 //           scripts/epics_csv_to_args.py.
 //   primer — the coach's shipped rules-primer.md, read on the MAIN THREAD and
@@ -16,6 +16,11 @@ export const meta = {
 //           Step 2. The primer used to be derived by a live Prime agent every
 //           run; it is now a version-stamped coach artifact for deterministic,
 //           reviewed, round-trip-free grounding.
+//   manualsPath — the resolved ABSOLUTE path to the coach's manuals-indexed/
+//           directory, resolved once on the MAIN THREAD (see SKILL.md Step 2)
+//           and injected into every measure agent. Given so no agent spends a
+//           tool round-trip filesystem-searching for the manuals; agents grep it
+//           directly ONLY for adjudications the primer does not cover.
 const epics = args?.epics ?? []
 if (!epics.length) throw new Error('Pass {epics:[...]} as args (see epics_csv_to_args.py)')
 
@@ -27,6 +32,19 @@ if (!primer || !String(primer).trim()) {
     'Missing args.primer. Read the coach\'s rules-primer.md ' +
     '(dk-cosmic-counting-coach/rules-primer.md) on the main thread and pass its ' +
     'contents as args.primer. The workflow does NOT derive the primer live.'
+  )
+}
+
+// Hard-fail on a missing manuals path, mirroring the primer guard (see ADR 0002).
+// Without a resolved manuals-indexed/ path each measure agent falls back to a
+// filesystem search to locate it — exactly the tool round-trip this change removes.
+const manualsPath = args?.manualsPath
+if (!manualsPath || !String(manualsPath).trim()) {
+  throw new Error(
+    'Missing args.manualsPath. Resolve the coach\'s manuals-indexed/ absolute ' +
+    'path on the main thread (realpath ~/.claude/skills/dk-cosmic-counting-coach/' +
+    'manuals-indexed) and pass it as args.manualsPath. The workflow does NOT ' +
+    'search the filesystem for the manuals.'
   )
 }
 
@@ -120,9 +138,20 @@ const measurePrompt = (epic, i) => `
 You are measuring ONE epic for COSMIC functional size (CFP), v5.0. Full detailed
 measurement — enumerate every data movement, no aggregation. 1 movement = 1 CFP.
 
+DATA ACCESS — your inputs below are COMPLETE and self-contained. Do NOT spend a
+tool round-trip re-fetching what you already hold:
+- The EPIC object below has every field you need (epic id, name, description).
+  MUST NOT re-read the source epics CSV. MUST NOT read the workflow's output JSON.
+- The rules primer below is the coach's grounding. MUST NOT re-resolve the coach
+  or skill directories (no \`realpath\`, \`fd\`, or project-wide \`rg\` to locate
+  the coach, the skill, or the manuals) — the manuals path is given to you below.
+
 SHARED RULES PRIMER (already derived from the coach — cite these directly, do
 NOT re-derive them; only grep the manuals for adjudications NOT covered here):
 ${primer}
+
+MANUALS PATH (resolved for you — use verbatim, do NOT search for it):
+${manualsPath}
 
 EPIC (epicId ${epic.epic_id}, index ${i}):
 ${JSON.stringify(epic, null, 2)}
@@ -130,11 +159,15 @@ ${JSON.stringify(epic, null, 2)}
 Method:
 1. Treat the epic as Functional User Requirements. Identify functional users,
    each functional process, and the objects of interest / data groups.
-2. Decompose each process into individual data movements — E/X/R/W. Apply the
-   primer rules directly (cite the primer's citation). For anything the primer
-   does NOT cover, invoke the \`cosmic-coach\` skill (Q&A mode) OR grep its
-   manuals-indexed/ directly, and record the exact citation. Never decide a
-   COSMIC rule from your own training — the v5.0 manuals are the sole authority.
+2. Decompose each process into individual data movements — E/X/R/W. For the
+   recurring patterns the primer covers (external round-trip, CRUD movements, the
+   single confirmation/error Exit, functional-process boundaries, single
+   triggering Entry), cite the primer DIRECTLY and perform NO manual read. Grep
+   the manuals ONLY as an exception — for an adjudication the primer does not
+   cover — using the MANUALS PATH above directly (e.g. \`rg <term> ${manualsPath}\`),
+   and record the exact \`manuals-indexed/<slug>/<file>.md#L..\` citation. Never
+   decide a COSMIC rule from your own training — the v5.0 manuals are the sole
+   authority for anything the primer does not settle.
 3. Where the requirement is too vague to identify a process or its movements,
    DO NOT invent a number. Emit a measurement gap:
    gapId = "CG-${epic.epic_id}-01" (increment NN per gap, deterministic — no

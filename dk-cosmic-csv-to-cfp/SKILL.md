@@ -98,17 +98,34 @@ the coach is not installed or its primer was never generated — stop and instal
 the coach / regenerate its primer (see the coach's *Regenerate the rules primer*
 step). Do **not** invent a primer.
 
-Invoke the Workflow tool with the script and the parsed args **plus the primer**:
+**Resolve the manuals path on the main thread.** Each measure agent is given the
+manuals location instead of filesystem-searching for it (which cost a tool
+round-trip per agent). Resolve the absolute `manuals-indexed/` path once:
+
+```bash
+MANUALS_PATH=$(realpath "$COACH_DIR/manuals-indexed")
+```
+
+Pass this as `args.manualsPath`. If the directory is missing, the coach's
+manuals were never indexed — stop and index them; do **not** pass a guessed path.
+
+Invoke the Workflow tool with the script and the parsed args **plus the primer
+and the manuals path**:
 
 ```
 Workflow({
   scriptPath: "<SKILL_DIR>/scripts/cosmic-csv-to-cfp.workflow.js",
-  args: { epics: [...], primer: "<full contents of the coach's rules-primer.md>" }
+  args: {
+    epics: [...],
+    primer: "<full contents of the coach's rules-primer.md>",
+    manualsPath: "<resolved absolute path to the coach's manuals-indexed/>"
+  }
 })
 ```
 
 (Pass `args` as the actual JSON value, not a string.) The workflow **hard-fails**
-before any measure agent if `args.primer` is absent or empty. It then:
+before any measure agent if `args.primer` or `args.manualsPath` is absent or
+empty. It then:
 
 1. **Measure** — one agent per epic (medium effort, auto-throttled fan-out)
    decomposes each functional process into E/X/R/W movements, applying the
